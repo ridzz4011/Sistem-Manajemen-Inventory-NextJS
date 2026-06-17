@@ -9,8 +9,8 @@
     "start:migrate:prod": "node server.js",
     "lint": "eslint",
     "docker:dev": "npm run dev",
-    "docker:compose:dev": "docker-compose down && docker compose up -d --build",
-    "docker:compose:prod": "docker-compose down && docker compose -f docker-compose.prod.yml up -d --build"
+    "docker:compose:dev": "docker-compose down && docker-compose up -d --build",
+    "docker:compose:prod": "docker-compose down && docker-compose -f docker-compose.prod.yml up -d --build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
