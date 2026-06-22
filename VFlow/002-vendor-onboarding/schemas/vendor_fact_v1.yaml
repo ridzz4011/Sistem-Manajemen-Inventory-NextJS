@@ -1,0 +1,10 @@
+version: 1
+namespace: inventory.vendor
+schema_version: 1
+domain: inventory
+entity: vendor_fact
+
+fields:
+  - path: vendor_status
+    scalar: SYM
+    nullable: false

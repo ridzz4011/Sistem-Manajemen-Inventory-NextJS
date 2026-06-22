@@ -1,0 +1,157 @@
+version: "3.0"
+
+metadata:
+  id: stock-out-workflow
+  name: "Inventory Stock Out Approval"
+  description: |
+    Workflow pengeluaran barang dengan validasi stok
+    dan approval Kepala Gudang.
+
+spec:
+  activities:
+    - id: trigger
+      activity_type: Trigger
+      trigger_config:
+        trigger_type: webhook
+        webhook_config:
+          path: /inventory/stock-out
+          method: POST
+        response_framing: length_prefixed
+        end_activity: respond
+
+      output_variable: trigger_payload
+
+    - id: validate_stock
+      activity_type: VRule
+
+      rule_config:
+        rule_set_id: stock_out_rules_v1
+
+      input_mappings:
+        - target: current_stock
+          source:
+            language: v-cel
+            source: "trigger_payload.body.current_stock"
+
+        - target: requested_qty
+          source:
+            language: v-cel
+            source: "trigger_payload.body.requested_qty"
+
+      output_variable: stock_validation
+
+    - id: stock_decision
+      activity_type: Exclusive
+
+    - id: approval_task
+      activity_type: HumanTask
+
+      persistence: ssot
+
+      human_task_config:
+        task_type: stock-out-approval
+        assignee: kepala_gudang
+
+        title: "Approve Stock Out"
+
+        description: "Persetujuan pengeluaran barang"
+
+        priority: 90
+
+      input_mappings:
+        - target: request
+          source:
+            language: spv1
+            source: "$.trigger_payload.body"
+
+      output_variable: approval_result
+
+    - id: execute_stock_out
+      activity_type: Connector
+
+      connector_config:
+        connector_ref: vastar.http
+        operation: post
+
+      input_mappings:
+        - target: url
+          source:
+            language: literal
+            source: "http://host.docker.internal:3000/api/stock-out/approve"
+
+        - target: body
+          source:
+            language: v-cel
+            source: '{"transactionId": trigger_payload.body.transactionId}'
+
+      output_variable: stock_out_result
+
+    - id: approved_response
+      activity_type: Transform
+
+      input_mappings:
+        - target: response
+          source:
+            language: v-cel
+            source: '{"status":"approved","result":stock_out_result}'
+
+      output_variable: approved_response
+
+    - id: rejected_response
+      activity_type: Transform
+
+      input_mappings:
+        - target: response
+          source:
+            language: literal
+            source: '{"status":"rejected","reason":"insufficient_stock"}'
+
+      output_variable: rejected_response
+
+    - id: respond
+      activity_type: EndTrigger
+
+      end_trigger_config:
+        trigger_ref: trigger
+
+        final_response:
+          language: spv1
+          source: "$.approved_response"
+
+    - id: end
+      activity_type: End
+
+  flows:
+    - { id: f1, from: { node: trigger }, to: { node: validate_stock } }
+
+    - { id: f2, from: { node: validate_stock }, to: { node: stock_decision } }
+
+    - {
+        id: f3,
+        from: { node: stock_decision },
+        to: { node: approval_task },
+        condition: 'stock_validation.decision == "APPROVE"',
+        priority: 10,
+      }
+
+    - {
+        id: f4,
+        from: { node: stock_decision },
+        to: { node: rejected_response },
+        condition: 'stock_validation.decision == "REJECT"',
+        priority: 20,
+      }
+
+    - { id: f5, from: { node: approval_task }, to: { node: execute_stock_out } }
+
+    - {
+        id: f6,
+        from: { node: execute_stock_out },
+        to: { node: approved_response },
+      }
+
+    - { id: f7, from: { node: approved_response }, to: { node: respond } }
+
+    - { id: f8, from: { node: rejected_response }, to: { node: respond } }
+
+    - { id: f9, from: { node: respond }, to: { node: end } }

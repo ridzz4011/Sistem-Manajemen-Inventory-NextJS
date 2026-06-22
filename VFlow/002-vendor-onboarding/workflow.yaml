@@ -1,0 +1,151 @@
+version: "3.0"
+
+metadata:
+  id: vendor-onboarding
+  name: "Vendor Onboarding Workflow"
+  description: |
+    Workflow onboarding vendor baru dengan validasi
+    dan approval Manager Pembelian.
+
+spec:
+  activities:
+    - id: trigger
+      activity_type: Trigger
+
+      trigger_config:
+        trigger_type: webhook
+
+        webhook_config:
+          path: /inventory/vendor/register
+          method: POST
+
+        response_framing: length_prefixed
+
+        end_activity: respond-approved
+
+      output_variable: trigger_payload
+
+    - id: evaluate_vendor
+      activity_type: VRule
+
+      rule_config:
+        rule_set_id: vendor_rules_v1
+
+      input_mappings:
+        - target: vendor_status
+          source:
+            language: v-cel
+            source: "trigger_payload.body.vendor_status"
+
+      output_variable: rule_result
+
+    - id: vendor_decision
+      activity_type: Exclusive
+
+    - id: approval_task
+      activity_type: HumanTask
+
+      persistence: ssot
+
+      human_task_config:
+        task_type: vendor-approval
+
+        assignee: manager_pembelian
+
+        title: "Vendor Approval"
+
+        description: "Persetujuan vendor baru"
+
+        priority: 90
+
+      input_mappings:
+        - target: vendor
+          source:
+            language: spv1
+            source: "$.trigger_payload.body"
+
+      output_variable: approval_result
+
+    - id: approved_response
+      activity_type: Transform
+
+      input_mappings:
+        - target: response
+          source:
+            language: literal
+            source: '{"status":"approved"}'
+
+      output_variable: approved_response
+
+    - id: rejected_response
+      activity_type: Transform
+
+      input_mappings:
+        - target: response
+          source:
+            language: literal
+            source: '{"status":"rejected","reason":"blacklisted_vendor"}'
+
+      output_variable: rejected_response
+
+    - id: respond-approved
+      activity_type: EndTrigger
+
+      end_trigger_config:
+        trigger_ref: trigger
+
+        final_response:
+          language: spv1
+          source: "$.approved_response"
+
+    - id: respond-rejected
+      activity_type: EndTrigger
+
+      end_trigger_config:
+        trigger_ref: trigger
+
+        final_response:
+          language: spv1
+          source: "$.rejected_response"
+
+    - id: end
+      activity_type: End
+
+  flows:
+    - { id: f1, from: { node: trigger }, to: { node: evaluate_vendor } }
+
+    - { id: f2, from: { node: evaluate_vendor }, to: { node: vendor_decision } }
+
+    - {
+        id: f3,
+        from: { node: vendor_decision },
+        to: { node: approval_task },
+        condition: 'rule_result.decision == "REVIEW"',
+        priority: 10,
+      }
+
+    - {
+        id: f4,
+        from: { node: vendor_decision },
+        to: { node: rejected_response },
+        condition: 'rule_result.decision == "REJECT"',
+        priority: 20,
+      }
+
+    - { id: f5, from: { node: approval_task }, to: { node: approved_response } }
+
+    - {
+        id: f6,
+        from: { node: approved_response },
+        to: { node: respond-approved },
+      }
+
+    - {
+        id: f7,
+        from: { node: rejected_response },
+        to: { node: respond-rejected },
+      }
+
+    - { id: f8, from: { node: respond-approved }, to: { node: end } }
+
+    - { id: f9, from: { node: respond-rejected }, to: { node: end } }

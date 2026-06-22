@@ -1,0 +1,33 @@
+schema_ref:
+  path: "../schemas/stock_opname_fact_v1.yaml"
+  namespace: "inventory.opname"
+  entity: "stock_opname_fact"
+  version: 1
+
+hit_policy: PRIORITY
+
+rules:
+
+  - id: "OPNAME_CLASSIFICATION"
+    priority: 10
+    enabled: true
+
+    description: "Selisih stok besar"
+
+    when: "stock_difference > 10"
+
+    then:
+      - kind: SET_DECISION
+        decision: INVESTIGATE
+
+  - id: "OPNAME_NORMAL"
+    priority: 100
+    enabled: true
+
+    description: "Selisih stok wajar"
+
+    when: "stock_difference <= 10"
+
+    then:
+      - kind: SET_DECISION
+        decision: APPROVE
