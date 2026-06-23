@@ -10,4 +10,137 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+// Kolom status ini sangat krusial untuk nantinya dikendalikan oleh VFlow.
+enum TransactionStatus {
+  DRAFT
+  PENDING     // Menunggu persetujuan
+  APPROVED    // Disetujui, stok siap diproses
+  REJECTED    // Ditolak oleh sistem (VRule) atau atasan (VFlow)
+  COMPLETED   // Selesai, stok fisik telah berubah
+}
+
+enum TransactionType {
+  STOCK_IN
+  STOCK_OUT
+  STOCK_OPNAME
+}
+
+enum EntityType {
+  VENDOR
+  CLIENT
+}
+
+// --- MODELS ---
+
+// 1. Manajemen Master Data Barang
+model Item {
+  id          String             @id @default(cuid())
+  sku         String             @unique
+  name        String
+  description String?
+  basePrice   Decimal            @default(0.0) // Menggunakan Decimal untuk presisi harga
+  uom         String             // Unit of Measurement (misal: PCS, KG, BOX)
+  
+  // Kolom metadata JSON untuk menyimpan atribut dinamis (VRule / Starlark) tanpa mengubah skema
+  metadata    Json?              
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  balances    InventoryBalance[]
+  details     TransactionDetail[]
+}
+
+// 2. Manajemen Vendor & Klien
+model Partner {
+  id          String       @id @default(cuid())
+  name        String
+  type        EntityType
+  email       String?
+  phone       String?
+  address     String?
+  
+  metadata    Json?        // Misal: untuk menyimpan status "Blacklisted" atau limit kredit dari VRule
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  transactions Transaction[]
+}
+
+// 6. Manajemen Lokasi & Rak
+model Warehouse {
+  id          String     @id @default(cuid())
+  name        String
+  code        String     @unique
+  address     String?
+  
+  locations   Location[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Location {
+  id          String             @id @default(cuid())
+  name        String             // Misal: "Rak A1", "Area Penerimaan"
+  warehouseId String
+  warehouse   Warehouse          @relation(fields: [warehouseId], references: [id])
+  
+  metadata    Json?              // Misal: menyimpan rekomendasi tipe barang yang boleh masuk
+
+  balances    InventoryBalance[]
+  details     TransactionDetail[]
+}
+
+// Tabel Pivot / Saldo Inventaris Faktual (Inventory Balance)
+model InventoryBalance {
+  id          String    @id @default(cuid())
+  itemId      String
+  locationId  String
+  quantity    Int       @default(0) // Jumlah stok fisik saat ini
+
+  item        Item      @relation(fields: [itemId], references: [id])
+  location    Location  @relation(fields: [locationId], references: [id])
+
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([itemId, locationId]) // Mencegah duplikasi pencatatan stok di lokasi yang sama
+}
+
+// 3, 4, 5. Manajemen Transaksi (Stock In, Stock Out, Stock Opname)
+model Transaction {
+  id          String            @id @default(cuid())
+  referenceNo String            @unique // Nomor dokumen (misal: PO-123, SO-456)
+  type        TransactionType
+  status      TransactionStatus @default(DRAFT)
+  
+  partnerId   String?           // Bisa null untuk Stock Opname
+  partner     Partner?          @relation(fields: [partnerId], references: [id])
+
+  notes       String?
+  metadata    Json?             // Digunakan oleh VFlow untuk menyimpan log persetujuan atau alasan reject
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  details     TransactionDetail[]
+}
+
+model TransactionDetail {
+  id            String      @id @default(cuid())
+  transactionId String
+  itemId        String
+  locationId    String
+  quantity      Int         // Jumlah barang yang masuk/keluar/selisih
+  
+  metadata      Json?       // VRule bisa menyimpan data spesifik baris di sini (misal: alasan selisih)
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  item          Item        @relation(fields: [itemId], references: [id])
+  location      Location    @relation(fields: [locationId], references: [id])
 }
