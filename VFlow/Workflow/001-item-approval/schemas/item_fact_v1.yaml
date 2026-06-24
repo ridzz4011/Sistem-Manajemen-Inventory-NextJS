@@ -1,0 +1,10 @@
+version: 1
+namespace: inventory.item
+schema_version: 1
+domain: inventory
+entity: item_fact
+
+fields:
+  - path: item_price
+    scalar: F64
+    nullable: false

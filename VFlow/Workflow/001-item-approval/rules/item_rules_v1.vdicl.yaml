@@ -1,0 +1,33 @@
+schema_ref:
+  path: "../schemas/item_fact_v1.yaml"
+  namespace: "inventory.item"
+  entity: "item_fact"
+  version: 1
+
+hit_policy: PRIORITY
+
+rules:
+
+  - id: "HIGH_VALUE_ITEM"
+    priority: 10
+    enabled: true
+
+    description: "Barang bernilai tinggi"
+
+    when: "item_price > 10000000"
+
+    then:
+      - kind: SET_DECISION
+        decision: REVIEW
+
+  - id: "NORMAL_ITEM"
+    priority: 100
+    enabled: true
+
+    description: "Barang normal"
+
+    when: "item_price <= 10000000"
+
+    then:
+      - kind: SET_DECISION
+        decision: APPROVE

@@ -1,0 +1,185 @@
+version: "3.0"
+
+metadata:
+id: stock-in-workflow
+name: "Inventory Stock In Workflow"
+description: |
+Workflow penerimaan barang dengan validasi quantity,
+dispute handling, approval, dan update inventory.
+
+spec:
+activities:
+
+```
+- id: trigger
+  activity_type: Trigger
+
+  trigger_config:
+    trigger_type: webhook
+
+    webhook_config:
+      path: /inventory/stock-in
+      method: POST
+
+    response_framing: length_prefixed
+
+    end_activity: respond
+
+  output_variable: trigger_payload
+
+- id: validate_stock_in
+  activity_type: VRule
+
+  rule_config:
+    rule_set_id: stock_in_rules_v1
+
+  input_mappings:
+    - target: expected_qty
+      source:
+        language: v-cel
+        source: "trigger_payload.body.expected_qty"
+
+    - target: received_qty
+      source:
+        language: v-cel
+        source: "trigger_payload.body.received_qty"
+
+  output_variable: rule_result
+
+- id: stock_in_decision
+  activity_type: Exclusive
+
+- id: normal_approval
+  activity_type: HumanTask
+
+  persistence: ssot
+
+  human_task_config:
+    task_type: stock-in-approval
+
+    assignee: kepala_gudang
+
+    title: "Approve Stock In"
+
+    description: "Persetujuan penerimaan barang"
+
+    priority: 90
+
+  input_mappings:
+    - target: request
+      source:
+        language: spv1
+        source: "$.trigger_payload.body"
+
+  output_variable: approval_result
+
+- id: dispute_review
+  activity_type: HumanTask
+
+  persistence: ssot
+
+  human_task_config:
+    task_type: stock-in-dispute
+
+    assignee: manager_operasional
+
+    title: "Review Stock In Dispute"
+
+    description: "Review selisih quantity barang masuk"
+
+    priority: 95
+
+  input_mappings:
+    - target: request
+      source:
+        language: spv1
+        source: "$.trigger_payload.body"
+
+  output_variable: dispute_result
+
+- id: update_inventory
+  activity_type: Connector
+
+  connector_config:
+    connector_ref: vastar.http
+    operation: post
+
+  input_mappings:
+    - target: url
+      source:
+        language: literal
+        source: "http://host.docker.internal:3000/api/stock-in/approve"
+
+    - target: body
+      source:
+        language: v-cel
+        source: '{"transactionId": trigger_payload.body.transactionId}'
+
+  output_variable: inventory_result
+
+- id: completed_response
+  activity_type: Transform
+
+  input_mappings:
+    - target: response
+      source:
+        language: v-cel
+        source: '{"status":"completed","result":inventory_result}'
+
+  output_variable: completed_response
+
+- id: respond
+  activity_type: EndTrigger
+
+  end_trigger_config:
+    trigger_ref: trigger
+
+    final_response:
+      language: spv1
+      source: "$.completed_response"
+
+- id: end
+  activity_type: End
+```
+
+flows:
+
+```
+- { id: f1, from: { node: trigger }, to: { node: validate_stock_in } }
+
+- { id: f2, from: { node: validate_stock_in }, to: { node: stock_in_decision } }
+
+- {
+    id: f3,
+    from: { node: stock_in_decision },
+    to: { node: normal_approval },
+    condition: 'rule_result.decision == "APPROVE"',
+    priority: 10
+  }
+
+- {
+    id: f4,
+    from: { node: stock_in_decision },
+    to: { node: dispute_review },
+    condition: 'rule_result.decision == "DISPUTE"',
+    priority: 20
+  }
+
+- { id: f5, from: { node: normal_approval }, to: { node: update_inventory } }
+
+- { id: f6, from: { node: dispute_review }, to: { node: update_inventory } }
+
+- { id: f7, from: { node: update_inventory }, to: { node: completed_response } }
+
+- { id: f8, from: { node: completed_response }, to: { node: respond } }
+
+- { id: f9, from: { node: respond }, to: { node: end } }
+```
+
+variables:
+- { name: trigger_payload, type: object }
+- { name: rule_result, type: object }
+- { name: approval_result, type: object }
+- { name: dispute_result, type: object }
+- { name: inventory_result, type: object }
+- { name: completed_response, type: object }

@@ -1,0 +1,14 @@
+version: 1
+namespace: inventory.stockout
+schema_version: 1
+domain: inventory
+entity: stock_out_fact
+
+fields:
+  - path: current_stock
+    scalar: F64
+    nullable: false
+
+  - path: requested_qty
+    scalar: F64
+    nullable: false

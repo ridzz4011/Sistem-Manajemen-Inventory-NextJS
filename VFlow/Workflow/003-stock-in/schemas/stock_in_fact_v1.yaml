@@ -1,0 +1,14 @@
+version: 1
+namespace: inventory.stockin
+schema_version: 1
+domain: inventory
+entity: stock_in_fact
+
+fields:
+  - path: expected_qty
+    scalar: F64
+    nullable: false
+
+  - path: received_qty
+    scalar: F64
+    nullable: false

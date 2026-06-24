@@ -1,0 +1,10 @@
+version: 1
+namespace: inventory.opname
+schema_version: 1
+domain: inventory
+entity: stock_opname_fact
+
+fields:
+  - path: stock_difference
+    scalar: F64
+    nullable: false
