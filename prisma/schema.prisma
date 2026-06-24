@@ -1,13 +1,213 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum TransactionStatus {
+  DRAFT
+  PENDING
+  DISPUTE
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum TransactionType {
+  STOCK_IN
+  STOCK_OUT
+  STOCK_OPNAME
+}
+
+enum EntityType {
+  VENDOR
+  CLIENT
+}
+
+enum RoleType {
+  ADMIN_GUDANG
+  KEPALA_GUDANG
+  MANAGER_OPERASIONAL
+  DIREKTUR
+}
+
+enum TaskStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model Role {
+  id          String @id @default(cuid())
+  name        RoleType @unique
+  description String?
+
+  workflowTasks WorkflowTask[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id          String @id @default(cuid())
+  sku         String @unique
+  name        String
+  description String?
+  basePrice   Decimal @db.Decimal(18,2)
+  uom         String
+
+  metadata Json?
+
+  balances InventoryBalance[]
+  details  TransactionDetail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id      String     @id @default(cuid())
+  name    String
+  type    EntityType
+  email   String?
+  phone   String?
+  address String?
+
+  metadata Json?
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Warehouse {
+  id      String @id @default(cuid())
+  name    String
+  code    String @unique
+  address String?
+
+  locations Location[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Location {
+  id          String @id @default(cuid())
+  name        String
+
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+
+  metadata Json?
+
+  balances InventoryBalance[]
+  details  TransactionDetail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InventoryBalance {
+  id String @id @default(cuid())
+
+  itemId String
+  item   Item @relation(fields: [itemId], references: [id])
+
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+
+  quantity Int @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([itemId, locationId])
+}
+
+model Transaction {
+  id          String @id @default(cuid())
+  referenceNo String @unique
+
+  type   TransactionType
+  status TransactionStatus @default(DRAFT)
+
+  partnerId String?
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+
+  notes String?
+
+  metadata Json?
+
+  workflowTasks WorkflowTask[]
+  auditLogs     AuditLog[]
+
+  details TransactionDetail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TransactionDetail {
+  id String @id @default(cuid())
+
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  itemId String
+  item   Item @relation(fields: [itemId], references: [id])
+
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+
+  quantity Int
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+}
+
+model WorkflowTask {
+  id String @id @default(cuid())
+
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+  roleId String
+  role   Role @relation(fields: [roleId], references: [id])
+
+  taskName String
+
+  status TaskStatus @default(PENDING)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+  workflowName String
+
+  entityType String
+  entityId   String
+
+  action String
+
+  actorRole String?
+
+  status String?
+
+  payload Json?
+
+  createdAt DateTime @default(now())
 }
