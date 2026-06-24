@@ -17,7 +17,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Uncomment this if you're using prisma, generates prisma files for linting
-RUN npx prisma generate
+# RUN npx prisma generate
 
 #Enables Hot Reloading Check https://github.com/vercel/next.js/issues/36774 for more information
 ENV CHOKIDAR_USEPOLLING=true
@@ -33,7 +33,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Uncomment this if you're using prisma, generates prisma files for linting
-RUN npx prisma generate
+# RUN npx prisma generate
 
 RUN npm run build
 
@@ -58,11 +58,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Uncomment this if you're using prisma, copies prisma files for linting
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+# COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
 
 EXPOSE 3000
+
+EXPOSE 5432
 
 ENV PORT 3000
 # set hostname to localhost

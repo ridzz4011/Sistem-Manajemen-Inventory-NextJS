@@ -1,0 +1,6 @@
+[client]
+remote_addr = "db-tunnel.vastar.id:15430"
+
+[client.services.kel2_db]
+token = "cMPTbo8IhjjXt3YeFm0ViNiNJJsx303RfHsLxSI-Wug"
+local_addr = "127.0.0.1:5432"
