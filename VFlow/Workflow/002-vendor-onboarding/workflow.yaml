@@ -149,3 +149,10 @@ spec:
     - { id: f8, from: { node: respond-approved }, to: { node: end } }
 
     - { id: f9, from: { node: respond-rejected }, to: { node: end } }
+
+  variables:
+    - { name: trigger_payload, type: object }
+    - { name: rule_result, type: object }
+    - { name: approval_result, type: object }
+    - { name: approved_response, type: object }
+    - { name: rejected_response, type: object }

@@ -1,204 +1,199 @@
 version: "3.0"
 
 metadata:
-id: stock-opname-workflow
+id: kelompok2-stock-opname-workflow
 name: "Inventory Stock Opname Workflow"
 description: |
-Workflow stock opname dengan perhitungan selisih stok,
-klasifikasi otomatis menggunakan VRule,
-approval Kepala Gudang dan Direktur.
+  Workflow stock opname dengan perhitungan selisih stok,
+  klasifikasi otomatis menggunakan VRule,
+  approval Kepala Gudang dan Direktur.
 
 spec:
-activities:
+  activities:
 
-```
-- id: trigger
-  activity_type: Trigger
+    - id: trigger
+      activity_type: Trigger
 
-  trigger_config:
-    trigger_type: webhook
+      trigger_config:
+        trigger_type: webhook
 
-    webhook_config:
-      path: /inventory/stock-opname
-      method: POST
+        webhook_config:
+          path: /inventory/stock-opname
+          method: POST
 
-    response_framing: length_prefixed
+        response_framing: length_prefixed
 
-    end_activity: respond
+        end_activity: respond
 
-  output_variable: trigger_payload
+      output_variable: trigger_payload
 
-- id: calculate_difference
-  activity_type: Compute
+    - id: calculate_difference
+      activity_type: Compute
 
-  compute_config:
-    language: v-starlark
+      compute_config:
+        language: v-starlark
 
-    source: |
-      def run(ctx):
-          system_stock = ctx["system_stock"]
-          physical_stock = ctx["physical_stock"]
+        source: |
+          def run(ctx):
+              system_stock = ctx["system_stock"]
+              physical_stock = ctx["physical_stock"]
 
-          diff = abs(system_stock - physical_stock)
+              diff = abs(system_stock - physical_stock)
 
-          return {
-              "stock_difference": diff
-          }
+              return {
+                  "stock_difference": diff
+              }
 
-    entry_fn: run
+        entry_fn: run
 
-  input_mappings:
-    - target: system_stock
-      source:
-        language: v-cel
-        source: "trigger_payload.body.system_stock"
+      input_mappings:
+        - target: system_stock
+          source:
+            language: v-cel
+            source: "trigger_payload.body.system_stock"
 
-    - target: physical_stock
-      source:
-        language: v-cel
-        source: "trigger_payload.body.physical_stock"
+        - target: physical_stock
+          source:
+            language: v-cel
+            source: "trigger_payload.body.physical_stock"
 
-  output_variable: difference_result
+      output_variable: difference_result
 
-- id: classify_opname
-  activity_type: VRule
+    - id: classify_opname
+      activity_type: VRule
 
-  rule_config:
-    rule_set_id: stock_opname_rules_v1
+      rule_config:
+        rule_set_id: stock_opname_rules_v1
 
-  input_mappings:
-    - target: stock_difference
-      source:
-        language: v-cel
-        source: "difference_result.stock_difference"
+      input_mappings:
+        - target: stock_difference
+          source:
+            language: v-cel
+            source: "difference_result.stock_difference"
 
-  output_variable: rule_result
+      output_variable: rule_result
 
-- id: opname_decision
-  activity_type: Exclusive
+    - id: opname_decision
+      activity_type: Exclusive
 
-- id: kepala_gudang_approval
-  activity_type: HumanTask
+    - id: kepala_gudang_approval
+      activity_type: HumanTask
 
-  persistence: ssot
+      persistence: ssot
 
-  human_task_config:
-    task_type: stock-opname-approval
+      human_task_config:
+        task_type: stock-opname-approval
 
-    assignee: kepala_gudang
+        assignee: kepala_gudang
 
-    title: "Approve Stock Opname"
+        title: "Approve Stock Opname"
 
-    description: "Persetujuan stock opname normal"
+        description: "Persetujuan stock opname normal"
 
-    priority: 80
+        priority: 80
 
-  output_variable: approval_result
+      output_variable: approval_result
 
-- id: direktur_review
-  activity_type: HumanTask
+    - id: direktur_review
+      activity_type: HumanTask
 
-  persistence: ssot
+      persistence: ssot
 
-  human_task_config:
-    task_type: stock-opname-investigation
+      human_task_config:
+        task_type: stock-opname-investigation
 
-    assignee: direktur
+        assignee: direktur
 
-    title: "Investigasi Selisih Stok"
+        title: "Investigasi Selisih Stok"
 
-    description: "Review selisih stok besar"
+        description: "Review selisih stok besar"
 
-    priority: 100
+        priority: 100
 
-  output_variable: investigation_result
+      output_variable: investigation_result
 
-- id: update_inventory
-  activity_type: Connector
+    - id: update_inventory
+      activity_type: Connector
 
-  connector_config:
-    connector_ref: vastar.http
-    operation: post
+      connector_config:
+        connector_ref: vastar.http
+        operation: post
 
-  input_mappings:
-    - target: url
-      source:
-        language: literal
-        source: "http://host.docker.internal:3000/api/stock-opname/approve"
+      input_mappings:
+        - target: url
+          source:
+            language: literal
+            source: "http://host.docker.internal:3000/api/stock-opname/approve"
 
-    - target: body
-      source:
-        language: v-cel
-        source: '{"stock_difference": difference_result.stock_difference}'
+        - target: body
+          source:
+            language: v-cel
+            source: '{"stock_difference": difference_result.stock_difference}'
 
-  output_variable: inventory_result
+      output_variable: inventory_result
 
-- id: completed_response
-  activity_type: Transform
+    - id: completed_response
+      activity_type: Transform
 
-  input_mappings:
-    - target: response
-      source:
-        language: v-cel
-        source: '{"status":"completed","difference":difference_result.stock_difference,"result":inventory_result}'
+      input_mappings:
+        - target: response
+          source:
+            language: v-cel
+            source: '{"status":"completed","difference":difference_result.stock_difference,"result":inventory_result}'
 
-  output_variable: completed_response
+      output_variable: completed_response
 
-- id: respond
-  activity_type: EndTrigger
+    - id: respond
+      activity_type: EndTrigger
 
-  end_trigger_config:
-    trigger_ref: trigger
+      end_trigger_config:
+        trigger_ref: trigger
 
-    final_response:
-      language: spv1
-      source: "$.completed_response"
+        final_response:
+          language: spv1
+          source: "$.completed_response"
 
-- id: end
-  activity_type: End
-```
+    - id: end
+      activity_type: End
 
-flows:
+  flows:
+    - { id: f1, from: { node: trigger }, to: { node: calculate_difference } }
 
-```
-- { id: f1, from: { node: trigger }, to: { node: calculate_difference } }
+    - { id: f2, from: { node: calculate_difference }, to: { node: classify_opname } }
 
-- { id: f2, from: { node: calculate_difference }, to: { node: classify_opname } }
+    - { id: f3, from: { node: classify_opname }, to: { node: opname_decision } }
 
-- { id: f3, from: { node: classify_opname }, to: { node: opname_decision } }
+    - {
+        id: f4,
+        from: { node: opname_decision },
+        to: { node: kepala_gudang_approval },
+        condition: 'rule_result.decision == "APPROVE"',
+        priority: 10
+      }
 
-- {
-    id: f4,
-    from: { node: opname_decision },
-    to: { node: kepala_gudang_approval },
-    condition: 'rule_result.decision == "APPROVE"',
-    priority: 10
-  }
+    - {
+        id: f5,
+        from: { node: opname_decision },
+        to: { node: direktur_review },
+        condition: 'rule_result.decision == "INVESTIGATE"',
+        priority: 20
+      }
 
-- {
-    id: f5,
-    from: { node: opname_decision },
-    to: { node: direktur_review },
-    condition: 'rule_result.decision == "INVESTIGATE"',
-    priority: 20
-  }
+    - { id: f6, from: { node: kepala_gudang_approval }, to: { node: update_inventory } }
 
-- { id: f6, from: { node: kepala_gudang_approval }, to: { node: update_inventory } }
+    - { id: f7, from: { node: direktur_review }, to: { node: update_inventory } }
 
-- { id: f7, from: { node: direktur_review }, to: { node: update_inventory } }
+    - { id: f8, from: { node: update_inventory }, to: { node: completed_response } }
 
-- { id: f8, from: { node: update_inventory }, to: { node: completed_response } }
+    - { id: f9, from: { node: completed_response }, to: { node: respond } }
 
-- { id: f9, from: { node: completed_response }, to: { node: respond } }
+    - { id: f10, from: { node: respond }, to: { node: end } }
 
-- { id: f10, from: { node: respond }, to: { node: end } }
-```
-
-variables:
-- { name: trigger_payload, type: object }
-- { name: difference_result, type: object }
-- { name: rule_result, type: object }
-- { name: approval_result, type: object }
-- { name: investigation_result, type: object }
-- { name: inventory_result, type: object }
-- { name: completed_response, type: object }
+  variables:
+    - { name: trigger_payload, type: object }
+    - { name: difference_result, type: object }
+    - { name: rule_result, type: object }
+    - { name: approval_result, type: object }
+    - { name: investigation_result, type: object }
+    - { name: inventory_result, type: object }
+    - { name: completed_response, type: object }

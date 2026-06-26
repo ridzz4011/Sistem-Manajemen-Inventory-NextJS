@@ -1,4 +1,0 @@
-# The provision-server example depends on local vflow source paths outside this
-# client/example repo, so its lockfile is environment-specific and should not be
-# committed here.
-provision-pattern/000-provision-server/Cargo.lock

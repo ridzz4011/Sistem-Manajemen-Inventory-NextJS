@@ -1,7 +1,7 @@
 version: "3.0"
 
 metadata:
-  id: stock-out-workflow
+  id: kelompok2-stock-out-workflow
   name: "Inventory Stock Out Approval"
   description: |
     Workflow pengeluaran barang dengan validasi stok
@@ -155,3 +155,11 @@ spec:
     - { id: f8, from: { node: rejected_response }, to: { node: respond } }
 
     - { id: f9, from: { node: respond }, to: { node: end } }
+
+  variables:
+    - { name: trigger_payload, type: object }
+    - { name: stock_validation, type: object }
+    - { name: approval_result, type: object }
+    - { name: stock_out_result, type: object }
+    - { name: approved_response, type: object }
+    - { name: rejected_response, type: object }
