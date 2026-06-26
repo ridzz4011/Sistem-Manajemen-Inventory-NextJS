@@ -1,5 +1,5 @@
 services:
-  web:
+  web: # Menjalankan container Next.js untuk aplikasi inventory
     container_name: nextjs-inv-app
     build:
       context: .
@@ -13,7 +13,7 @@ services:
       - .env
     depends_on:
       - db
-  db:
+  db: # Membuat container database postgres untuk menyimpan data inventory
     container_name: nextjs-inv-db
     image: postgres:18.4-alpine
     restart: always
@@ -27,6 +27,13 @@ services:
       - "5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+  db-tunnel: # Menghubungkan database lokal ke server vflow melalui rathole
+    container_name: nextjs-inv-db-tunnel
+    image: rapiz1/rathole:latest
+    restart: always
+    command: ["--client", "/app/client.toml"]
+    volumes:
+      - ./kel3-client.toml:/app/client.toml
 
 volumes:
   db_data:

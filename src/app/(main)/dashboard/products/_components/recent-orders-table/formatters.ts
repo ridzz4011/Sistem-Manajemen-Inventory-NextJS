@@ -1,31 +1,39 @@
 import type React from "react";
 
-import type { OrderFilter } from "./schema";
+import type { TransactionFilter } from "./schema";
 
-export function formatOrderCount(filter: OrderFilter, count: number) {
+export function formatOrderCount(filter: TransactionFilter, count: number) {
   const orderLabel = count === 1 ? "order" : "orders";
 
-  if (filter === "All") {
+  if (filter === "ALL") {
     return `${count.toLocaleString()} ${orderLabel}`;
   }
 
-  if (filter === "Needs action") {
-    return `${count.toLocaleString()} ${orderLabel} need action`;
+  if (filter === "DRAFT") {
+    return `${count.toLocaleString()} ${orderLabel} DRAFT`;
   }
 
-  if (filter === "Returns") {
-    return `${count.toLocaleString()} ${count === 1 ? "return" : "returns"}`;
+  if (filter === "PENDING") {
+    return `${count.toLocaleString()} ${orderLabel} PENDING`;
   }
 
-  return `${count.toLocaleString()} ${filter.toLowerCase()} ${orderLabel}`;
+  if (filter === "APPROVED") {
+    return `${count.toLocaleString()} ${orderLabel} APPROVED`;
+  }
+
+  if (filter === "COMPLETED") {
+    return `${count.toLocaleString()} ${orderLabel} COMPLETED`;
+  }
+
+  if (filter === "REJECTED") {
+    return `${count.toLocaleString()} ${orderLabel} REJECTED`;
+  }
+
+  return `${count.toLocaleString()} ${String(filter).toLowerCase()} ${orderLabel}`;
 }
 
 export function formatSelectedOrderCount(count: number) {
   const orderLabel = count === 1 ? "order" : "orders";
 
   return `${count.toLocaleString()} ${orderLabel} selected`;
-}
-
-export function preventPaginationNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
-  event.preventDefault();
 }

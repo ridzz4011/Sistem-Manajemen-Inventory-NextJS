@@ -2,7 +2,6 @@
 "use no memo";
 
 import * as React from "react";
-
 import {
   type ColumnFiltersState,
   flexRender,
@@ -14,36 +13,32 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUpRight, Download, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight, Download, MoreHorizontal, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
-import { recentOrdersColumns } from "./recent-orders-table/columns";
-import recentOrdersData from "./recent-orders-table/data.json";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import {
-  formatOrderCount,
-  formatSelectedOrderCount,
-} from "./recent-orders-table/formatters";
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { AddItemForm } from "./add-item-forms";
+
+import { inventoryColumns } from "./inventory-table/columns";
+import { type InventoryRow } from "./inventory-table/schema";
 import { preventPaginationNavigation } from "@/lib/utils";
-import { type TransactionFilter, type TransactionRow, transactionFilters } from "./recent-orders-table/schema";
+import { useState } from "react";
 
 interface InventoryTableProps {
-  data: TransactionRow[]; // Menerima data asli dari database
+  data: InventoryRow[]; // Menerima data asli dari database
 }
 
-export function RecentOrders({ data }: InventoryTableProps) {
+export function InventoryTable({ data }: InventoryTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -53,8 +48,8 @@ export function RecentOrders({ data }: InventoryTableProps) {
   });
 
   const table = useReactTable({
-    data: data,
-    columns: recentOrdersColumns,
+    data, // Menggunakan data dari props
+    columns: inventoryColumns, // Menggunakan definisi kolom inventaris
     state: {
       rowSelection,
       sorting,
@@ -73,37 +68,44 @@ export function RecentOrders({ data }: InventoryTableProps) {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  const activeFilter = (table.getColumn("status")?.getFilterValue() as TransactionFilter | undefined) ?? "ALL";
-  const orderCount = table.getFilteredRowModel().rows.length;
-  const selectedOrderCount = table.getSelectedRowModel().rows.length;
-  const visibleOrderCount = table.getRowModel().rows.length;
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  const itemCount = table.getFilteredRowModel().rows.length;
+  const visibleItemCount = table.getRowModel().rows.length;
   const currentPage = table.getState().pagination.pageIndex + 1;
   const pageCount = table.getPageCount();
-  const orderCountDescription =
-    selectedOrderCount > 0 ? formatSelectedOrderCount(selectedOrderCount) : formatOrderCount(activeFilter, orderCount);
+
   const pageNumbers = React.useMemo(() => {
     if (pageCount <= 3) {
       return Array.from({ length: pageCount }, (_, index) => index + 1);
     }
-
     if (currentPage <= 2) return [1, 2, 3];
     if (currentPage >= pageCount - 1) return [pageCount - 2, pageCount - 1, pageCount];
-
     return [currentPage - 1, currentPage, currentPage + 1];
   }, [currentPage, pageCount]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Recent Orders</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Stok Gudang</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {orderCountDescription}
+          {itemCount} Barang
         </CardDescription>
         <CardAction className="flex items-center gap-1">
-          <Button aria-label="Open orders" size="icon-sm" variant="outline">
-            <ArrowUpRight />
-          </Button>
-          <Button aria-label="Download orders" size="icon-sm" variant="outline">
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button aria-label="Tambah barang" size="icon-sm" variant="default">
+                <Plus />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-106.25">
+              <DialogHeader>
+                <DialogTitle>Tambah Barang Baru</DialogTitle>
+              </DialogHeader>
+              <AddItemForm />
+            </DialogContent>
+          </Dialog>
+          <Button aria-label="Export data" size="icon-sm" variant="outline">
             <Download />
           </Button>
           <Button size="icon-sm" variant="outline">
@@ -114,29 +116,12 @@ export function RecentOrders({ data }: InventoryTableProps) {
 
       <CardContent className="flex flex-col gap-4 px-0">
         <div className="flex items-center justify-between px-4">
-          <ToggleGroup
-            className="bg-muted p-0.75 text-muted-foreground **:data-[slot=toggle-group-item]:rounded-md **:data-[slot=toggle-group-item]:border **:data-[slot=toggle-group-item]:border-transparent **:data-[slot=toggle-group-item]:text-foreground/60 **:data-[slot=toggle-group-item]:hover:text-foreground [&_[data-slot=toggle-group-item][data-state=on]]:bg-background [&_[data-slot=toggle-group-item][data-state=on]]:text-foreground [&_[data-slot=toggle-group-item][data-state=on]]:shadow-sm dark:[&_[data-slot=toggle-group-item][data-state=on]]:border-input dark:[&_[data-slot=toggle-group-item][data-state=on]]:bg-input/30"
-            onValueChange={(value) => {
-              if (!value) return;
-              table.getColumn("status")?.setFilterValue(value === "ALL" ? undefined : value);
-              table.setPageIndex(0);
-            }}
-            size="sm"
-            spacing={1}
-            type="single"
-            value={activeFilter}
-          >
-            {transactionFilters.map((filter) => (
-              <ToggleGroupItem key={filter} value={filter}>
-                {filter}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-
+          {/* Anda bisa menambahkan search bar atau filter kategori di sini */}
+          <div className="flex-1" />
           <Button
             size="icon-sm"
             variant="outline"
-            onClick={() => table.getColumn("date")?.toggleSorting(table.getColumn("date")?.getIsSorted() === "asc")}
+            onClick={() => table.getColumn("name")?.toggleSorting(table.getColumn("name")?.getIsSorted() === "asc")}
           >
             <ArrowUpDown />
           </Button>
@@ -167,18 +152,14 @@ export function RecentOrders({ data }: InventoryTableProps) {
               ) : (
                 <TableRow>
                   <TableCell className="h-24 text-center" colSpan={table.getVisibleLeafColumns().length}>
-                    No orders found.
+                    Tidak ada barang di gudang.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
-
         <div className="flex items-center justify-between gap-4 px-4 pb-1">
-          <p className="text-muted-foreground text-sm">
-            Viewing {visibleOrderCount} out of {orderCount.toLocaleString()} orders
-          </p>
 
           <Pagination className="mx-0 w-auto justify-end">
             <PaginationContent className="gap-1.5">
@@ -228,7 +209,8 @@ export function RecentOrders({ data }: InventoryTableProps) {
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </div>
+        </div>        
+
       </CardContent>
     </Card>
   );

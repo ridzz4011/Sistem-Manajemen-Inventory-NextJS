@@ -44,4 +44,6 @@ next-env.d.ts
 
 /.agents
 
-skills-lock.json
+skills-lock.
+
+kel2-client.toml

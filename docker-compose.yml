@@ -1,5 +1,5 @@
 services:
-  web:
+  web: # Menjalankan container Next.js untuk aplikasi inventory
     container_name: nextjs-inv-app
     build:
       context: .
@@ -19,7 +19,20 @@ services:
       - .env
     depends_on:
       - db
-  db:
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      # Ganti nextjs-inv-app jika nama service Next.js Anda berbeda di file ini
+      - "nextjs-inv-app:3000" 
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040" # Port untuk melihat dashboard Ngrok secara lokal
+    depends_on:
+      - web
+  db: # Membuat container database postgres untuk menyimpan data inventory
     container_name: nextjs-inv-db
     image: postgres:18.4-alpine
     restart: always
@@ -33,6 +46,5 @@ services:
       - "5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-
 volumes:
   db_data:

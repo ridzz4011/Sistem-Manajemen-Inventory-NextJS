@@ -1,13 +1,14 @@
-export const orderFilters = ["All", "Needs action", "Unfulfilled", "Unpaid", "Returns"] as const;
+export const transactionFilters = ["ALL", "DRAFT", "PENDING", "APPROVED", "DISPUTE", "COMPLETED", "REJECTED"] as const;
 
-export type OrderFilter = (typeof orderFilters)[number];
+export type TransactionFilter = (typeof transactionFilters)[number];
 
-export type OrderRow = {
+export type TransactionRow = {
   id: string;
-  date: string;
-  customer: string;
-  payment: "Paid" | "Pending" | "Refunded";
-  total: string;
-  items: string;
-  fulfillment: "Fulfilled" | "Returned" | "Unfulfilled";
+  referenceNo: string;       // Nomor PO / SO
+  date: string;              // Tanggal transaksi (createdAt)
+  partnerName: string;       // Nama dari relasi Partner (bisa Vendor / Klien)
+  type: "STOCK_IN" | "STOCK_OUT" | "STOCK_OPNAME"; 
+  status: "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED" | "DISPUTE"; // Status dari transaksi
+  totalItems: number;        // Jumlah total barang dari TransactionDetail
+  notes?: string | null;
 };

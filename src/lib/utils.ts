@@ -40,3 +40,9 @@ export function formatCurrency(
 
   return new Intl.NumberFormat(locale, formatOptions).format(amount);
 }
+
+export function preventPaginationNavigation(
+  event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+) {
+  event.preventDefault();
+}

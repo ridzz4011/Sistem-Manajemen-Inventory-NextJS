@@ -1,194 +1,156 @@
-import type { ColumnDef } from "@tanstack/react-table";
-import { format, parseISO } from "date-fns";
-import { MoreHorizontal } from "lucide-react";
+"use client";
 
+import { type ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown, Eye, MoreHorizontal, FileText } from "lucide-react";
+
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import type { OrderRow } from "./schema";
+import { type TransactionRow } from "./schema";
 
-function formatOrderDate(date: string) {
-  return format(parseISO(date), "h:mm a, d MMM yyyy");
-}
-
-function PaymentBadge({ status }: { status: OrderRow["payment"] }) {
-  if (status === "Paid") {
-    return (
-      <Badge
-        className="border-green-700/25 text-green-700 dark:border-green-300/25 dark:text-green-300"
-        variant="outline"
-      >
-        <span className="size-1.5 rounded-full bg-current" />
-        Paid
-      </Badge>
-    );
-  }
-
-  if (status === "Refunded") {
-    return (
-      <Badge variant="destructive">
-        <span className="size-1.5 rounded-full bg-current" />
-        Refunded
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge
-      className="border-yellow-700/25 text-yellow-700 dark:border-yellow-300/25 dark:text-yellow-300"
-      variant="outline"
-    >
-      <span className="size-1.5 rounded-full bg-current" />
-      Pending
-    </Badge>
-  );
-}
-
-function FulfillmentBadge({ status }: { status: OrderRow["fulfillment"] }) {
-  if (status === "Fulfilled") {
-    return (
-      <Badge
-        className="border-green-700/25 text-green-700 dark:border-green-300/25 dark:text-green-300"
-        variant="outline"
-      >
-        <span className="size-1.5 rounded-full bg-current" />
-        Fulfilled
-      </Badge>
-    );
-  }
-
-  if (status === "Returned") {
-    return (
-      <Badge variant="destructive">
-        <span className="size-1.5 rounded-full bg-current" />
-        Returned
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge variant="destructive">
-      <span className="size-1.5 rounded-full bg-current" />
-      Unfulfilled
-    </Badge>
-  );
-}
-
-export const recentOrdersColumns: ColumnDef<OrderRow>[] = [
+export const recentOrdersColumns: ColumnDef<TransactionRow>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <div className="w-10">
-        <Checkbox
-          aria-label="Select all orders"
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        />
-      </div>
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
     ),
     cell: ({ row }) => (
-      <div className="w-10">
-        <Checkbox
-          aria-label={`Select order ${row.original.id}`}
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-        />
-      </div>
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
     ),
-    enableHiding: false,
     enableSorting: false,
-  },
-  {
-    accessorKey: "id",
-    header: "Order",
-    cell: ({ row }) => (
-      <div className="flex flex-col gap-0.5">
-        <div className="font-medium leading-none">{row.original.id}</div>
-        <div className="text-muted-foreground text-xs">{row.original.items}</div>
-      </div>
-    ),
     enableHiding: false,
   },
   {
-    accessorKey: "customer",
-    header: "Customer",
-  },
-  {
-    id: "statusSummary",
-    header: "Status",
+    accessorKey: "referenceNo",
+    header: "No. Referensi",
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <PaymentBadge status={row.original.payment} />
-        <FulfillmentBadge status={row.original.fulfillment} />
-      </div>
+      <div className="font-mono text-sm font-medium">{row.getValue("referenceNo")}</div>
     ),
-    filterFn: (row, _columnId, value) => {
-      if (value === "Needs action") {
-        return (
-          row.original.payment === "Pending" ||
-          row.original.payment === "Refunded" ||
-          row.original.fulfillment === "Unfulfilled" ||
-          row.original.fulfillment === "Returned"
-        );
-      }
-
-      if (value === "Unfulfilled") {
-        return row.original.fulfillment === "Unfulfilled";
-      }
-
-      if (value === "Unpaid") {
-        return row.original.payment === "Pending";
-      }
-
-      if (value === "Returns") {
-        return row.original.payment === "Refunded" || row.original.fulfillment === "Returned";
-      }
-
-      return true;
-    },
-  },
-  {
-    accessorKey: "total",
-    header: () => <div className="w-28">Total</div>,
-    cell: ({ row }) => <div className="w-28 tabular-nums">{row.original.total}</div>,
   },
   {
     accessorKey: "date",
-    header: () => <div className="w-44">Date</div>,
-    cell: ({ row }) => <div className="w-44 text-muted-foreground">{formatOrderDate(row.original.date)}</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="p-0 hover:bg-transparent"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Tanggal
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      // Asumsi format string dari Server: "DD MMM YYYY" atau sejenisnya
+      return <div className="text-sm text-muted-foreground">{row.getValue("date")}</div>;
+    },
+  },
+  {
+    accessorKey: "partnerName",
+    header: "Partner",
+    cell: ({ row }) => {
+      const name = row.getValue("partnerName") as string;
+      return (
+        <div className="font-medium">
+          {name ? name : <span className="italic text-muted-foreground">Internal</span>}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "type",
+    header: "Tipe",
+    cell: ({ row }) => {
+      const type = row.original.type;
+      const typeLabel = type.replace("_", " ");
+      
+      return (
+        <Badge variant="secondary" className="font-normal text-[11px]">
+          {typeLabel}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status;
+
+      // Pemetaan warna berdasarkan status VFlow
+      const statusStyles = {
+        DRAFT: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+        PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200",
+        APPROVED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200",
+        COMPLETED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200",
+        REJECTED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200",
+        DISPUTE: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200"
+      };
+
+      return (
+        <Badge variant="outline" className={`font-normal rounded-md ${statusStyles[status] || ""}`}>
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "totalItems",
+    header: () => <div className="text-right">Total Item</div>,
+    cell: ({ row }) => (
+      <div className="text-right font-medium tabular-nums">{row.getValue("totalItems")}</div>
+    ),
   },
   {
     id: "actions",
-    header: () => <div className="flex w-full justify-end">Actions</div>,
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="flex w-full justify-end">
-            <Button aria-label="Open order actions" size="icon-sm" variant="ghost">
-              <MoreHorizontal />
-            </Button>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuLabel>Order Actions</DropdownMenuLabel>
-          <DropdownMenuGroup>
-            <DropdownMenuItem>View order</DropdownMenuItem>
-            <DropdownMenuItem>Contact customer</DropdownMenuItem>
-            <DropdownMenuItem>Copy order ID</DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    enableHiding: false,
-    enableSorting: false,
+    cell: ({ row }) => {
+      const transaction = row.original;
+
+      return (
+        <div className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Buka menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Aksi Transaksi</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => console.log("Lihat Detail", transaction.id)}>
+                <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
+                Lihat Detail
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log("Cetak Dokumen", transaction.id)}>
+                <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                Cetak Dokumen
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      );
+    },
   },
 ];
