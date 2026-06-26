@@ -87,9 +87,9 @@ export function InventoryTable({ data }: InventoryTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Stok Gudang</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Inventory Stock</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {itemCount} Barang
+          {itemCount} Item
         </CardDescription>
         <CardAction className="flex items-center gap-1">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

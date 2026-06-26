@@ -60,7 +60,8 @@ export const ModelName = {
   Transaction: 'Transaction',
   TransactionDetail: 'TransactionDetail',
   WorkflowTask: 'WorkflowTask',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  ApprovalRequest: 'ApprovalRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -213,6 +214,20 @@ export const AuditLogScalarFieldEnum = {
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
+export const ApprovalRequestScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  requestedBy: 'requestedBy',
+  status: 'status',
+  payload: 'payload',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ApprovalRequestScalarFieldEnum = (typeof ApprovalRequestScalarFieldEnum)[keyof typeof ApprovalRequestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -227,6 +242,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

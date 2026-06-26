@@ -41,6 +41,18 @@ enum TaskStatus {
   COMPLETED
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ApprovalType {
+  NEW_ITEM
+  NEW_VENDOR
+  STOCK_ADJUSTMENT
+}
+
 model Role {
   id          String @id @default(cuid())
   name        RoleType @unique
@@ -210,4 +222,19 @@ model AuditLog {
   payload Json?
 
   createdAt DateTime @default(now())
+}
+
+model ApprovalRequest {
+  id          String         @id @default(cuid())
+  type        ApprovalType   // Jenis request (Barang Baru, Vendor Baru, dll)
+  requestedBy String         // Bisa diubah menjadi relasi ke model User jika ada (misal: @relation(fields: [userId], references: [id]))
+  status      ApprovalStatus @default(PENDING)
+  payload     Json           // Menyimpan data form mentah yang belum disetujui
+  notes       String?        // Catatan opsional (misal: alasan penolakan)
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status]) // Indexing untuk mempercepat pencarian data PENDING
+  @@index([type])
 }

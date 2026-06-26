@@ -56,3 +56,21 @@ export const TaskStatus = {
 } as const
 
 export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]
+
+
+export const ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus]
+
+
+export const ApprovalType = {
+  NEW_ITEM: 'NEW_ITEM',
+  NEW_VENDOR: 'NEW_VENDOR',
+  STOCK_ADJUSTMENT: 'STOCK_ADJUSTMENT'
+} as const
+
+export type ApprovalType = (typeof ApprovalType)[keyof typeof ApprovalType]

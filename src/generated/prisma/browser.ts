@@ -67,3 +67,8 @@ export type WorkflowTask = Prisma.WorkflowTaskModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model ApprovalRequest
+ * 
+ */
+export type ApprovalRequest = Prisma.ApprovalRequestModel

@@ -32,11 +32,18 @@ export async function createItemAction(data: any) {
   try {
     // 1. Cek duplikasi SKU di database lokal (Prisma) terlebih dahulu!
     const existingItem = await prisma.item.findUnique({
-      where: { sku: data.item_sku }, // Pastikan ini sesuai dengan key dari frontend Anda
+      where: { sku: data.item_sku, name: data.item_name }, // Pastikan ini sesuai dengan key dari frontend Anda
     });
 
     // Kembalikan error khusus jika SKU duplikat
-    if (existingItem) {
+    if (existingItem?.sku) {
+      if (existingItem?.name) {
+        return {
+          success: false,
+          errorType: "DUPLICATE_NAME",
+          message:"Nama ini sudah terdaftar di sistem."
+        };
+      }
       return { 
         success: false, 
         errorType: "DUPLICATE_SKU", 
