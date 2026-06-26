@@ -40,6 +40,7 @@ export type TransactionDetailMinAggregateOutputType = {
   itemId: string | null
   locationId: string | null
   quantity: number | null
+  createdAt: Date | null
 }
 
 export type TransactionDetailMaxAggregateOutputType = {
@@ -48,6 +49,7 @@ export type TransactionDetailMaxAggregateOutputType = {
   itemId: string | null
   locationId: string | null
   quantity: number | null
+  createdAt: Date | null
 }
 
 export type TransactionDetailCountAggregateOutputType = {
@@ -57,6 +59,7 @@ export type TransactionDetailCountAggregateOutputType = {
   locationId: number
   quantity: number
   metadata: number
+  createdAt: number
   _all: number
 }
 
@@ -75,6 +78,7 @@ export type TransactionDetailMinAggregateInputType = {
   itemId?: true
   locationId?: true
   quantity?: true
+  createdAt?: true
 }
 
 export type TransactionDetailMaxAggregateInputType = {
@@ -83,6 +87,7 @@ export type TransactionDetailMaxAggregateInputType = {
   itemId?: true
   locationId?: true
   quantity?: true
+  createdAt?: true
 }
 
 export type TransactionDetailCountAggregateInputType = {
@@ -92,6 +97,7 @@ export type TransactionDetailCountAggregateInputType = {
   locationId?: true
   quantity?: true
   metadata?: true
+  createdAt?: true
   _all?: true
 }
 
@@ -188,6 +194,7 @@ export type TransactionDetailGroupByOutputType = {
   locationId: string
   quantity: number
   metadata: runtime.JsonValue | null
+  createdAt: Date
   _count: TransactionDetailCountAggregateOutputType | null
   _avg: TransactionDetailAvgAggregateOutputType | null
   _sum: TransactionDetailSumAggregateOutputType | null
@@ -220,6 +227,7 @@ export type TransactionDetailWhereInput = {
   locationId?: Prisma.StringFilter<"TransactionDetail"> | string
   quantity?: Prisma.IntFilter<"TransactionDetail"> | number
   metadata?: Prisma.JsonNullableFilter<"TransactionDetail">
+  createdAt?: Prisma.DateTimeFilter<"TransactionDetail"> | Date | string
   transaction?: Prisma.XOR<Prisma.TransactionScalarRelationFilter, Prisma.TransactionWhereInput>
   item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
   location?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
@@ -232,6 +240,7 @@ export type TransactionDetailOrderByWithRelationInput = {
   locationId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   transaction?: Prisma.TransactionOrderByWithRelationInput
   item?: Prisma.ItemOrderByWithRelationInput
   location?: Prisma.LocationOrderByWithRelationInput
@@ -247,6 +256,7 @@ export type TransactionDetailWhereUniqueInput = Prisma.AtLeast<{
   locationId?: Prisma.StringFilter<"TransactionDetail"> | string
   quantity?: Prisma.IntFilter<"TransactionDetail"> | number
   metadata?: Prisma.JsonNullableFilter<"TransactionDetail">
+  createdAt?: Prisma.DateTimeFilter<"TransactionDetail"> | Date | string
   transaction?: Prisma.XOR<Prisma.TransactionScalarRelationFilter, Prisma.TransactionWhereInput>
   item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
   location?: Prisma.XOR<Prisma.LocationScalarRelationFilter, Prisma.LocationWhereInput>
@@ -259,6 +269,7 @@ export type TransactionDetailOrderByWithAggregationInput = {
   locationId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
   _count?: Prisma.TransactionDetailCountOrderByAggregateInput
   _avg?: Prisma.TransactionDetailAvgOrderByAggregateInput
   _max?: Prisma.TransactionDetailMaxOrderByAggregateInput
@@ -276,12 +287,14 @@ export type TransactionDetailScalarWhereWithAggregatesInput = {
   locationId?: Prisma.StringWithAggregatesFilter<"TransactionDetail"> | string
   quantity?: Prisma.IntWithAggregatesFilter<"TransactionDetail"> | number
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"TransactionDetail">
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"TransactionDetail"> | Date | string
 }
 
 export type TransactionDetailCreateInput = {
   id?: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
   transaction: Prisma.TransactionCreateNestedOneWithoutDetailsInput
   item: Prisma.ItemCreateNestedOneWithoutDetailsInput
   location: Prisma.LocationCreateNestedOneWithoutDetailsInput
@@ -294,12 +307,14 @@ export type TransactionDetailUncheckedCreateInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transaction?: Prisma.TransactionUpdateOneRequiredWithoutDetailsNestedInput
   item?: Prisma.ItemUpdateOneRequiredWithoutDetailsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutDetailsNestedInput
@@ -312,6 +327,7 @@ export type TransactionDetailUncheckedUpdateInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailCreateManyInput = {
@@ -321,12 +337,14 @@ export type TransactionDetailCreateManyInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailUncheckedUpdateManyInput = {
@@ -336,6 +354,7 @@ export type TransactionDetailUncheckedUpdateManyInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailListRelationFilter = {
@@ -355,6 +374,7 @@ export type TransactionDetailCountOrderByAggregateInput = {
   locationId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type TransactionDetailAvgOrderByAggregateInput = {
@@ -367,6 +387,7 @@ export type TransactionDetailMaxOrderByAggregateInput = {
   itemId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type TransactionDetailMinOrderByAggregateInput = {
@@ -375,6 +396,7 @@ export type TransactionDetailMinOrderByAggregateInput = {
   itemId?: Prisma.SortOrder
   locationId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
 }
 
 export type TransactionDetailSumOrderByAggregateInput = {
@@ -511,6 +533,7 @@ export type TransactionDetailCreateWithoutItemInput = {
   id?: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
   transaction: Prisma.TransactionCreateNestedOneWithoutDetailsInput
   location: Prisma.LocationCreateNestedOneWithoutDetailsInput
 }
@@ -521,6 +544,7 @@ export type TransactionDetailUncheckedCreateWithoutItemInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailCreateOrConnectWithoutItemInput = {
@@ -559,12 +583,14 @@ export type TransactionDetailScalarWhereInput = {
   locationId?: Prisma.StringFilter<"TransactionDetail"> | string
   quantity?: Prisma.IntFilter<"TransactionDetail"> | number
   metadata?: Prisma.JsonNullableFilter<"TransactionDetail">
+  createdAt?: Prisma.DateTimeFilter<"TransactionDetail"> | Date | string
 }
 
 export type TransactionDetailCreateWithoutLocationInput = {
   id?: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
   transaction: Prisma.TransactionCreateNestedOneWithoutDetailsInput
   item: Prisma.ItemCreateNestedOneWithoutDetailsInput
 }
@@ -575,6 +601,7 @@ export type TransactionDetailUncheckedCreateWithoutLocationInput = {
   itemId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailCreateOrConnectWithoutLocationInput = {
@@ -607,6 +634,7 @@ export type TransactionDetailCreateWithoutTransactionInput = {
   id?: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
   item: Prisma.ItemCreateNestedOneWithoutDetailsInput
   location: Prisma.LocationCreateNestedOneWithoutDetailsInput
 }
@@ -617,6 +645,7 @@ export type TransactionDetailUncheckedCreateWithoutTransactionInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailCreateOrConnectWithoutTransactionInput = {
@@ -651,12 +680,14 @@ export type TransactionDetailCreateManyItemInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailUpdateWithoutItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transaction?: Prisma.TransactionUpdateOneRequiredWithoutDetailsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutDetailsNestedInput
 }
@@ -667,6 +698,7 @@ export type TransactionDetailUncheckedUpdateWithoutItemInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailUncheckedUpdateManyWithoutItemInput = {
@@ -675,6 +707,7 @@ export type TransactionDetailUncheckedUpdateManyWithoutItemInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailCreateManyLocationInput = {
@@ -683,12 +716,14 @@ export type TransactionDetailCreateManyLocationInput = {
   itemId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   transaction?: Prisma.TransactionUpdateOneRequiredWithoutDetailsNestedInput
   item?: Prisma.ItemUpdateOneRequiredWithoutDetailsNestedInput
 }
@@ -699,6 +734,7 @@ export type TransactionDetailUncheckedUpdateWithoutLocationInput = {
   itemId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailUncheckedUpdateManyWithoutLocationInput = {
@@ -707,6 +743,7 @@ export type TransactionDetailUncheckedUpdateManyWithoutLocationInput = {
   itemId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailCreateManyTransactionInput = {
@@ -715,12 +752,14 @@ export type TransactionDetailCreateManyTransactionInput = {
   locationId: string
   quantity: number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
 }
 
 export type TransactionDetailUpdateWithoutTransactionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   item?: Prisma.ItemUpdateOneRequiredWithoutDetailsNestedInput
   location?: Prisma.LocationUpdateOneRequiredWithoutDetailsNestedInput
 }
@@ -731,6 +770,7 @@ export type TransactionDetailUncheckedUpdateWithoutTransactionInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TransactionDetailUncheckedUpdateManyWithoutTransactionInput = {
@@ -739,6 +779,7 @@ export type TransactionDetailUncheckedUpdateManyWithoutTransactionInput = {
   locationId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -750,6 +791,7 @@ export type TransactionDetailSelect<ExtArgs extends runtime.Types.Extensions.Int
   locationId?: boolean
   quantity?: boolean
   metadata?: boolean
+  createdAt?: boolean
   transaction?: boolean | Prisma.TransactionDefaultArgs<ExtArgs>
   item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -762,6 +804,7 @@ export type TransactionDetailSelectCreateManyAndReturn<ExtArgs extends runtime.T
   locationId?: boolean
   quantity?: boolean
   metadata?: boolean
+  createdAt?: boolean
   transaction?: boolean | Prisma.TransactionDefaultArgs<ExtArgs>
   item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -774,6 +817,7 @@ export type TransactionDetailSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   locationId?: boolean
   quantity?: boolean
   metadata?: boolean
+  createdAt?: boolean
   transaction?: boolean | Prisma.TransactionDefaultArgs<ExtArgs>
   item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
   location?: boolean | Prisma.LocationDefaultArgs<ExtArgs>
@@ -786,9 +830,10 @@ export type TransactionDetailSelectScalar = {
   locationId?: boolean
   quantity?: boolean
   metadata?: boolean
+  createdAt?: boolean
 }
 
-export type TransactionDetailOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "transactionId" | "itemId" | "locationId" | "quantity" | "metadata", ExtArgs["result"]["transactionDetail"]>
+export type TransactionDetailOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "transactionId" | "itemId" | "locationId" | "quantity" | "metadata" | "createdAt", ExtArgs["result"]["transactionDetail"]>
 export type TransactionDetailInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transaction?: boolean | Prisma.TransactionDefaultArgs<ExtArgs>
   item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
@@ -819,6 +864,7 @@ export type $TransactionDetailPayload<ExtArgs extends runtime.Types.Extensions.I
     locationId: string
     quantity: number
     metadata: runtime.JsonValue | null
+    createdAt: Date
   }, ExtArgs["result"]["transactionDetail"]>
   composites: {}
 }
@@ -1251,6 +1297,7 @@ export interface TransactionDetailFieldRefs {
   readonly locationId: Prisma.FieldRef<"TransactionDetail", 'String'>
   readonly quantity: Prisma.FieldRef<"TransactionDetail", 'Int'>
   readonly metadata: Prisma.FieldRef<"TransactionDetail", 'Json'>
+  readonly createdAt: Prisma.FieldRef<"TransactionDetail", 'DateTime'>
 }
     
 

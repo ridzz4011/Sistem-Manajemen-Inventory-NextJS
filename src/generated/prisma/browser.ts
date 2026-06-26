@@ -18,6 +18,11 @@ export { Prisma }
 export * as $Enums from './enums'
 export * from './enums';
 /**
+ * Model Role
+ * 
+ */
+export type Role = Prisma.RoleModel
+/**
  * Model Item
  * 
  */
@@ -52,3 +57,13 @@ export type Transaction = Prisma.TransactionModel
  * 
  */
 export type TransactionDetail = Prisma.TransactionDetailModel
+/**
+ * Model WorkflowTask
+ * 
+ */
+export type WorkflowTask = Prisma.WorkflowTaskModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

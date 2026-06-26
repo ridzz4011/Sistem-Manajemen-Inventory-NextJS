@@ -12,6 +12,7 @@
 export const TransactionStatus = {
   DRAFT: 'DRAFT',
   PENDING: 'PENDING',
+  DISPUTE: 'DISPUTE',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
   COMPLETED: 'COMPLETED'
@@ -35,3 +36,23 @@ export const EntityType = {
 } as const
 
 export type EntityType = (typeof EntityType)[keyof typeof EntityType]
+
+
+export const RoleType = {
+  ADMIN_GUDANG: 'ADMIN_GUDANG',
+  KEPALA_GUDANG: 'KEPALA_GUDANG',
+  MANAGER_OPERASIONAL: 'MANAGER_OPERASIONAL',
+  DIREKTUR: 'DIREKTUR'
+} as const
+
+export type RoleType = (typeof RoleType)[keyof typeof RoleType]
+
+
+export const TaskStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus]

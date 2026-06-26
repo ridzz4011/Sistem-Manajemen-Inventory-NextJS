@@ -211,6 +211,8 @@ export type TransactionWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   partner?: Prisma.XOR<Prisma.PartnerNullableScalarRelationFilter, Prisma.PartnerWhereInput> | null
+  workflowTasks?: Prisma.WorkflowTaskListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   details?: Prisma.TransactionDetailListRelationFilter
 }
 
@@ -225,6 +227,8 @@ export type TransactionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   partner?: Prisma.PartnerOrderByWithRelationInput
+  workflowTasks?: Prisma.WorkflowTaskOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   details?: Prisma.TransactionDetailOrderByRelationAggregateInput
 }
 
@@ -242,6 +246,8 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   partner?: Prisma.XOR<Prisma.PartnerNullableScalarRelationFilter, Prisma.PartnerWhereInput> | null
+  workflowTasks?: Prisma.WorkflowTaskListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
   details?: Prisma.TransactionDetailListRelationFilter
 }, "id" | "referenceNo">
 
@@ -285,6 +291,8 @@ export type TransactionCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   partner?: Prisma.PartnerCreateNestedOneWithoutTransactionsInput
+  workflowTasks?: Prisma.WorkflowTaskCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTransactionInput
   details?: Prisma.TransactionDetailCreateNestedManyWithoutTransactionInput
 }
 
@@ -298,6 +306,8 @@ export type TransactionUncheckedCreateInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTransactionInput
   details?: Prisma.TransactionDetailUncheckedCreateNestedManyWithoutTransactionInput
 }
 
@@ -311,6 +321,8 @@ export type TransactionUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   partner?: Prisma.PartnerUpdateOneWithoutTransactionsNestedInput
+  workflowTasks?: Prisma.WorkflowTaskUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTransactionNestedInput
   details?: Prisma.TransactionDetailUpdateManyWithoutTransactionNestedInput
 }
 
@@ -324,6 +336,8 @@ export type TransactionUncheckedUpdateInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTransactionNestedInput
   details?: Prisma.TransactionDetailUncheckedUpdateManyWithoutTransactionNestedInput
 }
 
@@ -411,6 +425,11 @@ export type TransactionScalarRelationFilter = {
   isNot?: Prisma.TransactionWhereInput
 }
 
+export type TransactionNullableScalarRelationFilter = {
+  is?: Prisma.TransactionWhereInput | null
+  isNot?: Prisma.TransactionWhereInput | null
+}
+
 export type TransactionCreateNestedManyWithoutPartnerInput = {
   create?: Prisma.XOR<Prisma.TransactionCreateWithoutPartnerInput, Prisma.TransactionUncheckedCreateWithoutPartnerInput> | Prisma.TransactionCreateWithoutPartnerInput[] | Prisma.TransactionUncheckedCreateWithoutPartnerInput[]
   connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutPartnerInput | Prisma.TransactionCreateOrConnectWithoutPartnerInput[]
@@ -475,6 +494,36 @@ export type TransactionUpdateOneRequiredWithoutDetailsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TransactionUpdateToOneWithWhereWithoutDetailsInput, Prisma.TransactionUpdateWithoutDetailsInput>, Prisma.TransactionUncheckedUpdateWithoutDetailsInput>
 }
 
+export type TransactionCreateNestedOneWithoutWorkflowTasksInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedCreateWithoutWorkflowTasksInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutWorkflowTasksInput
+  connect?: Prisma.TransactionWhereUniqueInput
+}
+
+export type TransactionUpdateOneRequiredWithoutWorkflowTasksNestedInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedCreateWithoutWorkflowTasksInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutWorkflowTasksInput
+  upsert?: Prisma.TransactionUpsertWithoutWorkflowTasksInput
+  connect?: Prisma.TransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TransactionUpdateToOneWithWhereWithoutWorkflowTasksInput, Prisma.TransactionUpdateWithoutWorkflowTasksInput>, Prisma.TransactionUncheckedUpdateWithoutWorkflowTasksInput>
+}
+
+export type TransactionCreateNestedOneWithoutAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutAuditLogsInput, Prisma.TransactionUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutAuditLogsInput
+  connect?: Prisma.TransactionWhereUniqueInput
+}
+
+export type TransactionUpdateOneWithoutAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.TransactionCreateWithoutAuditLogsInput, Prisma.TransactionUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.TransactionCreateOrConnectWithoutAuditLogsInput
+  upsert?: Prisma.TransactionUpsertWithoutAuditLogsInput
+  disconnect?: Prisma.TransactionWhereInput | boolean
+  delete?: Prisma.TransactionWhereInput | boolean
+  connect?: Prisma.TransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TransactionUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.TransactionUpdateWithoutAuditLogsInput>, Prisma.TransactionUncheckedUpdateWithoutAuditLogsInput>
+}
+
 export type TransactionCreateWithoutPartnerInput = {
   id?: string
   referenceNo: string
@@ -484,6 +533,8 @@ export type TransactionCreateWithoutPartnerInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  workflowTasks?: Prisma.WorkflowTaskCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTransactionInput
   details?: Prisma.TransactionDetailCreateNestedManyWithoutTransactionInput
 }
 
@@ -496,6 +547,8 @@ export type TransactionUncheckedCreateWithoutPartnerInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTransactionInput
   details?: Prisma.TransactionDetailUncheckedCreateNestedManyWithoutTransactionInput
 }
 
@@ -550,6 +603,8 @@ export type TransactionCreateWithoutDetailsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   partner?: Prisma.PartnerCreateNestedOneWithoutTransactionsInput
+  workflowTasks?: Prisma.WorkflowTaskCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionUncheckedCreateWithoutDetailsInput = {
@@ -562,6 +617,8 @@ export type TransactionUncheckedCreateWithoutDetailsInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedCreateNestedManyWithoutTransactionInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTransactionInput
 }
 
 export type TransactionCreateOrConnectWithoutDetailsInput = {
@@ -590,6 +647,8 @@ export type TransactionUpdateWithoutDetailsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   partner?: Prisma.PartnerUpdateOneWithoutTransactionsNestedInput
+  workflowTasks?: Prisma.WorkflowTaskUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionUncheckedUpdateWithoutDetailsInput = {
@@ -602,6 +661,152 @@ export type TransactionUncheckedUpdateWithoutDetailsInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTransactionNestedInput
+}
+
+export type TransactionCreateWithoutWorkflowTasksInput = {
+  id?: string
+  referenceNo: string
+  type: $Enums.TransactionType
+  status?: $Enums.TransactionStatus
+  notes?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  partner?: Prisma.PartnerCreateNestedOneWithoutTransactionsInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTransactionInput
+  details?: Prisma.TransactionDetailCreateNestedManyWithoutTransactionInput
+}
+
+export type TransactionUncheckedCreateWithoutWorkflowTasksInput = {
+  id?: string
+  referenceNo: string
+  type: $Enums.TransactionType
+  status?: $Enums.TransactionStatus
+  partnerId?: string | null
+  notes?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTransactionInput
+  details?: Prisma.TransactionDetailUncheckedCreateNestedManyWithoutTransactionInput
+}
+
+export type TransactionCreateOrConnectWithoutWorkflowTasksInput = {
+  where: Prisma.TransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedCreateWithoutWorkflowTasksInput>
+}
+
+export type TransactionUpsertWithoutWorkflowTasksInput = {
+  update: Prisma.XOR<Prisma.TransactionUpdateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedUpdateWithoutWorkflowTasksInput>
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedCreateWithoutWorkflowTasksInput>
+  where?: Prisma.TransactionWhereInput
+}
+
+export type TransactionUpdateToOneWithWhereWithoutWorkflowTasksInput = {
+  where?: Prisma.TransactionWhereInput
+  data: Prisma.XOR<Prisma.TransactionUpdateWithoutWorkflowTasksInput, Prisma.TransactionUncheckedUpdateWithoutWorkflowTasksInput>
+}
+
+export type TransactionUpdateWithoutWorkflowTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referenceNo?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  partner?: Prisma.PartnerUpdateOneWithoutTransactionsNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTransactionNestedInput
+  details?: Prisma.TransactionDetailUpdateManyWithoutTransactionNestedInput
+}
+
+export type TransactionUncheckedUpdateWithoutWorkflowTasksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referenceNo?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+  partnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTransactionNestedInput
+  details?: Prisma.TransactionDetailUncheckedUpdateManyWithoutTransactionNestedInput
+}
+
+export type TransactionCreateWithoutAuditLogsInput = {
+  id?: string
+  referenceNo: string
+  type: $Enums.TransactionType
+  status?: $Enums.TransactionStatus
+  notes?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  partner?: Prisma.PartnerCreateNestedOneWithoutTransactionsInput
+  workflowTasks?: Prisma.WorkflowTaskCreateNestedManyWithoutTransactionInput
+  details?: Prisma.TransactionDetailCreateNestedManyWithoutTransactionInput
+}
+
+export type TransactionUncheckedCreateWithoutAuditLogsInput = {
+  id?: string
+  referenceNo: string
+  type: $Enums.TransactionType
+  status?: $Enums.TransactionStatus
+  partnerId?: string | null
+  notes?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedCreateNestedManyWithoutTransactionInput
+  details?: Prisma.TransactionDetailUncheckedCreateNestedManyWithoutTransactionInput
+}
+
+export type TransactionCreateOrConnectWithoutAuditLogsInput = {
+  where: Prisma.TransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutAuditLogsInput, Prisma.TransactionUncheckedCreateWithoutAuditLogsInput>
+}
+
+export type TransactionUpsertWithoutAuditLogsInput = {
+  update: Prisma.XOR<Prisma.TransactionUpdateWithoutAuditLogsInput, Prisma.TransactionUncheckedUpdateWithoutAuditLogsInput>
+  create: Prisma.XOR<Prisma.TransactionCreateWithoutAuditLogsInput, Prisma.TransactionUncheckedCreateWithoutAuditLogsInput>
+  where?: Prisma.TransactionWhereInput
+}
+
+export type TransactionUpdateToOneWithWhereWithoutAuditLogsInput = {
+  where?: Prisma.TransactionWhereInput
+  data: Prisma.XOR<Prisma.TransactionUpdateWithoutAuditLogsInput, Prisma.TransactionUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type TransactionUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referenceNo?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  partner?: Prisma.PartnerUpdateOneWithoutTransactionsNestedInput
+  workflowTasks?: Prisma.WorkflowTaskUpdateManyWithoutTransactionNestedInput
+  details?: Prisma.TransactionDetailUpdateManyWithoutTransactionNestedInput
+}
+
+export type TransactionUncheckedUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referenceNo?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  status?: Prisma.EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+  partnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedUpdateManyWithoutTransactionNestedInput
+  details?: Prisma.TransactionDetailUncheckedUpdateManyWithoutTransactionNestedInput
 }
 
 export type TransactionCreateManyPartnerInput = {
@@ -624,6 +829,8 @@ export type TransactionUpdateWithoutPartnerInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowTasks?: Prisma.WorkflowTaskUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTransactionNestedInput
   details?: Prisma.TransactionDetailUpdateManyWithoutTransactionNestedInput
 }
 
@@ -636,6 +843,8 @@ export type TransactionUncheckedUpdateWithoutPartnerInput = {
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflowTasks?: Prisma.WorkflowTaskUncheckedUpdateManyWithoutTransactionNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTransactionNestedInput
   details?: Prisma.TransactionDetailUncheckedUpdateManyWithoutTransactionNestedInput
 }
 
@@ -656,10 +865,14 @@ export type TransactionUncheckedUpdateManyWithoutPartnerInput = {
  */
 
 export type TransactionCountOutputType = {
+  workflowTasks: number
+  auditLogs: number
   details: number
 }
 
 export type TransactionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflowTasks?: boolean | TransactionCountOutputTypeCountWorkflowTasksArgs
+  auditLogs?: boolean | TransactionCountOutputTypeCountAuditLogsArgs
   details?: boolean | TransactionCountOutputTypeCountDetailsArgs
 }
 
@@ -671,6 +884,20 @@ export type TransactionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.
    * Select specific fields to fetch from the TransactionCountOutputType
    */
   select?: Prisma.TransactionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TransactionCountOutputType without action
+ */
+export type TransactionCountOutputTypeCountWorkflowTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WorkflowTaskWhereInput
+}
+
+/**
+ * TransactionCountOutputType without action
+ */
+export type TransactionCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
 }
 
 /**
@@ -692,6 +919,8 @@ export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   updatedAt?: boolean
   partner?: boolean | Prisma.Transaction$partnerArgs<ExtArgs>
+  workflowTasks?: boolean | Prisma.Transaction$workflowTasksArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Transaction$auditLogsArgs<ExtArgs>
   details?: boolean | Prisma.Transaction$detailsArgs<ExtArgs>
   _count?: boolean | Prisma.TransactionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["transaction"]>
@@ -737,6 +966,8 @@ export type TransactionSelectScalar = {
 export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "referenceNo" | "type" | "status" | "partnerId" | "notes" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["transaction"]>
 export type TransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   partner?: boolean | Prisma.Transaction$partnerArgs<ExtArgs>
+  workflowTasks?: boolean | Prisma.Transaction$workflowTasksArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Transaction$auditLogsArgs<ExtArgs>
   details?: boolean | Prisma.Transaction$detailsArgs<ExtArgs>
   _count?: boolean | Prisma.TransactionCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -751,6 +982,8 @@ export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "Transaction"
   objects: {
     partner: Prisma.$PartnerPayload<ExtArgs> | null
+    workflowTasks: Prisma.$WorkflowTaskPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     details: Prisma.$TransactionDetailPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1158,6 +1391,8 @@ readonly fields: TransactionFieldRefs;
 export interface Prisma__TransactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   partner<T extends Prisma.Transaction$partnerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transaction$partnerArgs<ExtArgs>>): Prisma.Prisma__PartnerClient<runtime.Types.Result.GetResult<Prisma.$PartnerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  workflowTasks<T extends Prisma.Transaction$workflowTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transaction$workflowTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkflowTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.Transaction$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transaction$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   details<T extends Prisma.Transaction$detailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Transaction$detailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionDetailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1614,6 +1849,54 @@ export type Transaction$partnerArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.PartnerInclude<ExtArgs> | null
   where?: Prisma.PartnerWhereInput
+}
+
+/**
+ * Transaction.workflowTasks
+ */
+export type Transaction$workflowTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkflowTask
+   */
+  select?: Prisma.WorkflowTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkflowTask
+   */
+  omit?: Prisma.WorkflowTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTaskInclude<ExtArgs> | null
+  where?: Prisma.WorkflowTaskWhereInput
+  orderBy?: Prisma.WorkflowTaskOrderByWithRelationInput | Prisma.WorkflowTaskOrderByWithRelationInput[]
+  cursor?: Prisma.WorkflowTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WorkflowTaskScalarFieldEnum | Prisma.WorkflowTaskScalarFieldEnum[]
+}
+
+/**
+ * Transaction.auditLogs
+ */
+export type Transaction$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**

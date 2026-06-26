@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Role'
 export type * from './models/Item'
 export type * from './models/Partner'
 export type * from './models/Warehouse'
@@ -15,4 +16,6 @@ export type * from './models/Location'
 export type * from './models/InventoryBalance'
 export type * from './models/Transaction'
 export type * from './models/TransactionDetail'
+export type * from './models/WorkflowTask'
+export type * from './models/AuditLog'
 export type * from './commonInputTypes'

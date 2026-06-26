@@ -316,7 +316,7 @@ export type ItemCreateInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -330,7 +330,7 @@ export type ItemUncheckedCreateInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -372,7 +372,7 @@ export type ItemCreateManyInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -450,24 +450,12 @@ export type ItemScalarRelationFilter = {
   isNot?: Prisma.ItemWhereInput
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type DecimalFieldUpdateOperationsInput = {
   set?: runtime.Decimal | runtime.DecimalJsLike | number | string
   increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type ItemCreateNestedOneWithoutBalancesInput = {
@@ -503,7 +491,7 @@ export type ItemCreateWithoutBalancesInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -516,7 +504,7 @@ export type ItemUncheckedCreateWithoutBalancesInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -571,7 +559,7 @@ export type ItemCreateWithoutDetailsInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
@@ -584,7 +572,7 @@ export type ItemUncheckedCreateWithoutDetailsInput = {
   sku: string
   name: string
   description?: string | null
-  basePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  basePrice: runtime.Decimal | runtime.DecimalJsLike | number | string
   uom: string
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string

@@ -51,13 +51,16 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Role: 'Role',
   Item: 'Item',
   Partner: 'Partner',
   Warehouse: 'Warehouse',
   Location: 'Location',
   InventoryBalance: 'InventoryBalance',
   Transaction: 'Transaction',
-  TransactionDetail: 'TransactionDetail'
+  TransactionDetail: 'TransactionDetail',
+  WorkflowTask: 'WorkflowTask',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -74,6 +77,17 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const RoleScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RoleScalarFieldEnum = (typeof RoleScalarFieldEnum)[keyof typeof RoleScalarFieldEnum]
 
 
 export const ItemScalarFieldEnum = {
@@ -122,7 +136,9 @@ export const LocationScalarFieldEnum = {
   id: 'id',
   name: 'name',
   warehouseId: 'warehouseId',
-  metadata: 'metadata'
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
@@ -160,10 +176,41 @@ export const TransactionDetailScalarFieldEnum = {
   itemId: 'itemId',
   locationId: 'locationId',
   quantity: 'quantity',
-  metadata: 'metadata'
+  metadata: 'metadata',
+  createdAt: 'createdAt'
 } as const
 
 export type TransactionDetailScalarFieldEnum = (typeof TransactionDetailScalarFieldEnum)[keyof typeof TransactionDetailScalarFieldEnum]
+
+
+export const WorkflowTaskScalarFieldEnum = {
+  id: 'id',
+  transactionId: 'transactionId',
+  roleId: 'roleId',
+  taskName: 'taskName',
+  status: 'status',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WorkflowTaskScalarFieldEnum = (typeof WorkflowTaskScalarFieldEnum)[keyof typeof WorkflowTaskScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  transactionId: 'transactionId',
+  workflowName: 'workflowName',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  action: 'action',
+  actorRole: 'actorRole',
+  status: 'status',
+  payload: 'payload',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -190,6 +237,14 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -197,12 +252,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
