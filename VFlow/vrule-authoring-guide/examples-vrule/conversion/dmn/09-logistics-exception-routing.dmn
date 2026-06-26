@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_logistics_exception" name="Logistics Exception Routing" namespace="https://vastar.id/examples/conversion/logistics-exception">
+  <decision id="d_logistics_exception_route" name="Logistics Exception Routing">
+    <decisionTable id="dt_logistics_exception_route" hitPolicy="FIRST">
+      <input id="i_delay" label="Delay hours">
+        <inputExpression typeRef="number"><text>shipment.delayHours</text></inputExpression>
+      </input>
+      <input id="i_temp" label="Temperature excursion">
+        <inputExpression typeRef="boolean"><text>shipment.temperatureExcursion</text></inputExpression>
+      </input>
+      <input id="i_value" label="Shipment value">
+        <inputExpression typeRef="number"><text>shipment.value</text></inputExpression>
+      </input>
+      <input id="i_lane" label="Lane risk">
+        <inputExpression typeRef="string"><text>shipment.laneRisk</text></inputExpression>
+      </input>
+      <input id="i_customs" label="Customs hold">
+        <inputExpression typeRef="boolean"><text>shipment.customsHold</text></inputExpression>
+      </input>
+      <input id="i_segment" label="Customer segment">
+        <inputExpression typeRef="string"><text>shipment.customerSegment</text></inputExpression>
+      </input>
+      <output id="o_route" name="exceptionRoute" typeRef="string"/>
+      <output id="o_escalation" name="escalationLevel" typeRef="string"/>
+      <output id="o_customer_notice" name="customerNotice" typeRef="string"/>
+      <rule id="r_cold_chain_breach">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"QUALITY_HOLD"</text></outputEntry>
+        <outputEntry><text>"CRITICAL"</text></outputEntry>
+        <outputEntry><text>"IMMEDIATE_CONTACT"</text></outputEntry>
+      </rule>
+      <rule id="r_strategic_high_value_delay">
+        <inputEntry><text>&gt;= 24</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 1000000000</text></inputEntry>
+        <inputEntry><text>"MEDIUM","HIGH"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"STRATEGIC","ENTERPRISE"</text></inputEntry>
+        <outputEntry><text>"CONTROL_TOWER"</text></outputEntry>
+        <outputEntry><text>"EXECUTIVE"</text></outputEntry>
+        <outputEntry><text>"PROACTIVE_RECOVERY_PLAN"</text></outputEntry>
+      </rule>
+      <rule id="r_customs_hold_priority">
+        <inputEntry><text>&gt;= 12</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 250000000</text></inputEntry>
+        <inputEntry><text>"HIGH"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"CUSTOMS_BROKER_ESCALATION"</text></outputEntry>
+        <outputEntry><text>"HIGH"</text></outputEntry>
+        <outputEntry><text>"CUSTOMS_DELAY_NOTICE"</text></outputEntry>
+      </rule>
+      <rule id="r_express_delay_recovery">
+        <inputEntry><text>[6..23]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"PREMIUM","ENTERPRISE"</text></inputEntry>
+        <outputEntry><text>"EXPEDITE_REPLAN"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>"ETA_RECOVERY_NOTICE"</text></outputEntry>
+      </rule>
+      <rule id="r_low_value_delay_standard">
+        <inputEntry><text>[12..48]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt; 50000000</text></inputEntry>
+        <inputEntry><text>"LOW"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"STANDARD"</text></inputEntry>
+        <outputEntry><text>"STANDARD_EXCEPTION_QUEUE"</text></outputEntry>
+        <outputEntry><text>"LOW"</text></outputEntry>
+        <outputEntry><text>"STANDARD_DELAY_NOTICE"</text></outputEntry>
+      </rule>
+      <rule id="r_high_risk_lane_watch">
+        <inputEntry><text>[1..11]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"HIGH"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"LANE_WATCH"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>"NO_NOTICE_YET"</text></outputEntry>
+      </rule>
+      <rule id="r_no_exception">
+        <inputEntry><text>&lt; 1</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"NO_ACTION"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+      </rule>
+      <rule id="r_default_ops_review">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"OPERATIONS_REVIEW"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>"PENDING_ASSESSMENT"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

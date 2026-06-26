@@ -1,0 +1,147 @@
+# decision: Insurance Claim Triage (d_claim_triage)
+version: 1
+decision_id: d_claim_triage
+decision_name: Insurance Claim Triage
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: claim_amount
+      type: number
+      expression: claim.amount
+      label: Claim amount
+    - name: claim_policyAgeDays
+      type: number
+      expression: claim.policyAgeDays
+      label: Policy age days
+    - name: claim_fraudScore
+      type: number
+      expression: claim.fraudScore
+      label: Fraud score
+    - name: claim_incidentType
+      type: string
+      expression: claim.incidentType
+      label: Incident type
+    - name: claim_documentationComplete
+      type: boolean
+      expression: claim.documentationComplete
+      label: Documentation complete
+  outputs:
+    - name: route
+      type: string
+    - name: reserveBand
+      type: string
+    - name: slaHours
+      type: number
+rules:
+  - id: r_incomplete_large_claim
+    description: dmn rule r_incomplete_large_claim
+    when: claim.amount >= 100000000 AND claim.documentationComplete == false
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "PENDING_DOCUMENTS"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "HIGH"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          24
+  - id: r_high_fraud_any_amount
+    description: dmn rule r_high_fraud_any_amount
+    when: claim.fraudScore >= 85 AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "SIU_INVESTIGATION"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "HOLD"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          4
+  - id: r_new_policy_high_value_theft
+    description: dmn rule r_new_policy_high_value_theft
+    when: claim.amount >= 50000000 AND claim.policyAgeDays < 90 AND claim.fraudScore >= 65 AND claim.incidentType IN ["THEFT", "TOTAL_LOSS"] AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "SENIOR_ADJUSTER"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "HIGH"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          8
+  - id: r_catastrophe_fast_track
+    description: dmn rule r_catastrophe_fast_track
+    when: claim.amount <= 25000000 AND claim.policyAgeDays >= 90 AND claim.fraudScore < 50 AND claim.incidentType IN ["FLOOD", "EARTHQUAKE", "WINDSTORM"] AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "CAT_FAST_TRACK"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "MEDIUM"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          12
+  - id: r_low_value_auto_approve
+    description: dmn rule r_low_value_auto_approve
+    when: claim.amount <= 5000000 AND claim.policyAgeDays >= 180 AND claim.fraudScore < 40 AND claim.incidentType IN ["GLASS", "MINOR_DAMAGE", "BAGGAGE"] AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "AUTO_APPROVE"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "LOW"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          2
+  - id: r_medical_manual_review
+    description: dmn rule r_medical_manual_review
+    when: claim.amount >= 5000000 AND claim.amount <= 50000000 AND claim.fraudScore >= 40 AND claim.fraudScore <= 64 AND claim.incidentType IN ["MEDICAL", "PERSONAL_ACCIDENT"] AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "MEDICAL_REVIEW"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "MEDIUM"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          24
+  - id: r_standard_adjuster
+    description: dmn rule r_standard_adjuster
+    when: claim.amount >= 5000001 AND claim.amount <= 49999999 AND claim.policyAgeDays >= 90 AND claim.fraudScore < 65 AND claim.documentationComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "STANDARD_ADJUSTER"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "MEDIUM"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          24
+  - id: r_default_complex
+    description: dmn rule r_default_complex
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.route
+        value: "COMPLEX_REVIEW"
+      - kind: SET_FIELD
+        path: Insurance_Claim_Triage.reserveBand
+        value: "MEDIUM"
+      - kind: EVAL_SET_FIELD
+        path: Insurance_Claim_Triage.slaHours
+        expr: >-
+          48

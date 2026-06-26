@@ -1,0 +1,139 @@
+# decision: Retail Credit Limit Eligibility (d_retail_credit_limit)
+version: 1
+decision_id: d_retail_credit_limit
+decision_name: Retail Credit Limit Eligibility
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: applicant_age
+      type: number
+      expression: applicant.age
+      label: Applicant age
+    - name: applicant_monthlyIncome
+      type: number
+      expression: applicant.monthlyIncome
+      label: Monthly income
+    - name: applicant_creditScore
+      type: number
+      expression: applicant.creditScore
+      label: Credit score
+    - name: applicant_relationshipTier
+      type: string
+      expression: applicant.relationshipTier
+      label: Relationship tier
+    - name: applicant_hasActiveDelinquency
+      type: boolean
+      expression: applicant.hasActiveDelinquency
+      label: Existing delinquency
+  outputs:
+    - name: decision
+      type: string
+    - name: limitBand
+      type: string
+    - name: reasonCode
+      type: string
+rules:
+  - id: r_reject_minor
+    description: dmn rule r_reject_minor
+    when: applicant.age < 21
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "DECLINE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "AGE_BELOW_POLICY"
+  - id: r_reject_active_delinquency
+    description: dmn rule r_reject_active_delinquency
+    when: applicant.hasActiveDelinquency == true
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "DECLINE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "ACTIVE_DELINQUENCY"
+  - id: r_premier_high_limit
+    description: dmn rule r_premier_high_limit
+    when: applicant.age >= 25 AND applicant.monthlyIncome >= 50000000 AND applicant.creditScore >= 780 AND applicant.relationshipTier IN ["PRIVATE", "PRIORITY"] AND applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "HIGH"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "PRIME_RELATIONSHIP"
+  - id: r_gold_high_limit
+    description: dmn rule r_gold_high_limit
+    when: applicant.age >= 23 AND applicant.monthlyIncome >= 25000000 AND applicant.creditScore >= 720 AND applicant.creditScore <= 779 AND applicant.relationshipTier IN ["GOLD", "PRIORITY"] AND applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "HIGH"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "STRONG_PROFILE"
+  - id: r_standard_medium_limit
+    description: dmn rule r_standard_medium_limit
+    when: applicant.age >= 23 AND applicant.monthlyIncome >= 12000000 AND applicant.monthlyIncome <= 24999999 AND applicant.creditScore >= 660 AND applicant.creditScore <= 719 AND applicant.relationshipTier IN ["SILVER", "STANDARD", "GOLD"] AND applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "MEDIUM"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "AFFORDABILITY_OK"
+  - id: r_manual_review_thin_file
+    description: dmn rule r_manual_review_thin_file
+    when: applicant.age >= 21 AND applicant.monthlyIncome >= 8000000 AND applicant.monthlyIncome <= 11999999 AND applicant.creditScore >= 620 AND applicant.creditScore <= 659 AND applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "REFER"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "LOW"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "THIN_OR_BORDERLINE_FILE"
+  - id: r_reject_low_score
+    description: dmn rule r_reject_low_score
+    when: applicant.creditScore < 620 AND applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "DECLINE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "CREDIT_SCORE_BELOW_MINIMUM"
+  - id: r_default_review
+    description: dmn rule r_default_review
+    when: applicant.hasActiveDelinquency == false
+    then:
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.decision
+        value: "REFER"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.limitBand
+        value: "LOW"
+      - kind: SET_FIELD
+        path: Retail_Credit_Limit_Eligibility.reasonCode
+        value: "POLICY_REVIEW_REQUIRED"

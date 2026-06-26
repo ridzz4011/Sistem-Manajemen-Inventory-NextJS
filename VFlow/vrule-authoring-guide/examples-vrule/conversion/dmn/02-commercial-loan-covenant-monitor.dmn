@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_commercial_covenant" name="Commercial Loan Covenant Monitor" namespace="https://vastar.id/examples/conversion/commercial-covenant">
+  <decision id="d_commercial_covenant_status" name="Commercial Loan Covenant Status">
+    <decisionTable id="dt_commercial_covenant_status" hitPolicy="FIRST">
+      <input id="i_dscr" label="Debt service coverage ratio">
+        <inputExpression typeRef="number"><text>borrower.dscr</text></inputExpression>
+      </input>
+      <input id="i_leverage" label="Leverage ratio">
+        <inputExpression typeRef="number"><text>borrower.leverageRatio</text></inputExpression>
+      </input>
+      <input id="i_liquidity" label="Liquidity runway days">
+        <inputExpression typeRef="number"><text>borrower.liquidityDays</text></inputExpression>
+      </input>
+      <input id="i_audit" label="Audit status">
+        <inputExpression typeRef="string"><text>borrower.auditStatus</text></inputExpression>
+      </input>
+      <input id="i_breaches" label="Covenant breach count">
+        <inputExpression typeRef="number"><text>borrower.covenantBreachCount</text></inputExpression>
+      </input>
+      <output id="o_status" name="covenantStatus" typeRef="string"/>
+      <output id="o_review" name="reviewLevel" typeRef="string"/>
+      <output id="o_action" name="actionCode" typeRef="string"/>
+      <rule id="r_event_default">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"QUALIFIED_OPINION","GOING_CONCERN"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"BREACH"</text></outputEntry>
+        <outputEntry><text>"EXECUTIVE_CREDIT"</text></outputEntry>
+        <outputEntry><text>"TRIGGER_EVENT_OF_DEFAULT"</text></outputEntry>
+      </rule>
+      <rule id="r_multiple_breach_watchlist">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt;= 3</text></inputEntry>
+        <outputEntry><text>"BREACH"</text></outputEntry>
+        <outputEntry><text>"SPECIAL_ASSETS"</text></outputEntry>
+        <outputEntry><text>"ESCALATE_REPEAT_BREACH"</text></outputEntry>
+      </rule>
+      <rule id="r_low_dscr_high_leverage">
+        <inputEntry><text>&lt; 1.10</text></inputEntry>
+        <inputEntry><text>&gt; 4.50</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"BREACH"</text></outputEntry>
+        <outputEntry><text>"CREDIT_COMMITTEE"</text></outputEntry>
+        <outputEntry><text>"RESTRUCTURE_REVIEW"</text></outputEntry>
+      </rule>
+      <rule id="r_liquidity_pressure">
+        <inputEntry><text>[1.10..1.25]</text></inputEntry>
+        <inputEntry><text>[3.50..4.50]</text></inputEntry>
+        <inputEntry><text>&lt; 45</text></inputEntry>
+        <inputEntry><text>"CLEAN","UNREVIEWED"</text></inputEntry>
+        <inputEntry><text>[1..2]</text></inputEntry>
+        <outputEntry><text>"WAIVER_REQUIRED"</text></outputEntry>
+        <outputEntry><text>"SENIOR_CREDIT"</text></outputEntry>
+        <outputEntry><text>"REQUEST_30_DAY_PLAN"</text></outputEntry>
+      </rule>
+      <rule id="r_soft_warning">
+        <inputEntry><text>[1.25..1.50]</text></inputEntry>
+        <inputEntry><text>[3.00..3.75]</text></inputEntry>
+        <inputEntry><text>[45..90]</text></inputEntry>
+        <inputEntry><text>"CLEAN"</text></inputEntry>
+        <inputEntry><text>0</text></inputEntry>
+        <outputEntry><text>"WATCH"</text></outputEntry>
+        <outputEntry><text>"PORTFOLIO_MANAGER"</text></outputEntry>
+        <outputEntry><text>"MONTHLY_MONITORING"</text></outputEntry>
+      </rule>
+      <rule id="r_stable_but_unaudited">
+        <inputEntry><text>&gt;= 1.50</text></inputEntry>
+        <inputEntry><text>&lt;= 3.00</text></inputEntry>
+        <inputEntry><text>&gt;= 90</text></inputEntry>
+        <inputEntry><text>"UNREVIEWED"</text></inputEntry>
+        <inputEntry><text>0</text></inputEntry>
+        <outputEntry><text>"COMPLIANT"</text></outputEntry>
+        <outputEntry><text>"RELATIONSHIP_MANAGER"</text></outputEntry>
+        <outputEntry><text>"OBTAIN_AUDIT_CONFIRMATION"</text></outputEntry>
+      </rule>
+      <rule id="r_strong_compliant">
+        <inputEntry><text>&gt;= 1.50</text></inputEntry>
+        <inputEntry><text>&lt;= 3.00</text></inputEntry>
+        <inputEntry><text>&gt;= 90</text></inputEntry>
+        <inputEntry><text>"CLEAN"</text></inputEntry>
+        <inputEntry><text>0</text></inputEntry>
+        <outputEntry><text>"COMPLIANT"</text></outputEntry>
+        <outputEntry><text>"AUTO_FILE"</text></outputEntry>
+        <outputEntry><text>"NO_ACTION"</text></outputEntry>
+      </rule>
+      <rule id="r_default_review">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"WATCH"</text></outputEntry>
+        <outputEntry><text>"SENIOR_CREDIT"</text></outputEntry>
+        <outputEntry><text>"MANUAL_COVENANT_REVIEW"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

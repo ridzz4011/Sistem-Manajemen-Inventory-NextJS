@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_supplier_risk" name="Supplier Risk Onboarding" namespace="https://vastar.id/examples/conversion/supplier-risk">
+  <decision id="d_supplier_onboarding" name="Supplier Risk Onboarding">
+    <decisionTable id="dt_supplier_onboarding" hitPolicy="FIRST">
+      <input id="i_spend" label="Annual spend">
+        <inputExpression typeRef="number"><text>supplier.annualSpend</text></inputExpression>
+      </input>
+      <input id="i_sanctions" label="Sanctions screening hit">
+        <inputExpression typeRef="boolean"><text>supplier.sanctionsHit</text></inputExpression>
+      </input>
+      <input id="i_financial" label="Financial health score">
+        <inputExpression typeRef="number"><text>supplier.financialHealthScore</text></inputExpression>
+      </input>
+      <input id="i_country" label="Country risk">
+        <inputExpression typeRef="string"><text>supplier.countryRisk</text></inputExpression>
+      </input>
+      <input id="i_certifications" label="Certifications complete">
+        <inputExpression typeRef="boolean"><text>supplier.certificationsComplete</text></inputExpression>
+      </input>
+      <output id="o_decision" name="onboardingDecision" typeRef="string"/>
+      <output id="o_monitoring" name="monitoringTier" typeRef="string"/>
+      <output id="o_owner" name="approvalOwner" typeRef="string"/>
+      <rule id="r_reject_sanctions_hit">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REJECT"</text></outputEntry>
+        <outputEntry><text>"PROHIBITED"</text></outputEntry>
+        <outputEntry><text>"COMPLIANCE"</text></outputEntry>
+      </rule>
+      <rule id="r_reject_critical_country_low_health">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt; 45</text></inputEntry>
+        <inputEntry><text>"CRITICAL"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REJECT"</text></outputEntry>
+        <outputEntry><text>"PROHIBITED"</text></outputEntry>
+        <outputEntry><text>"RISK_COMMITTEE"</text></outputEntry>
+      </rule>
+      <rule id="r_strategic_high_risk_committee">
+        <inputEntry><text>&gt;= 10000000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>[45..69]</text></inputEntry>
+        <inputEntry><text>"HIGH","CRITICAL"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"CONDITIONAL_APPROVE"</text></outputEntry>
+        <outputEntry><text>"ENHANCED"</text></outputEntry>
+        <outputEntry><text>"PROCUREMENT_RISK_COMMITTEE"</text></outputEntry>
+      </rule>
+      <rule id="r_missing_certifications">
+        <inputEntry><text>&gt;= 1000000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 60</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"PENDING"</text></outputEntry>
+        <outputEntry><text>"STANDARD"</text></outputEntry>
+        <outputEntry><text>"PROCUREMENT_MANAGER"</text></outputEntry>
+      </rule>
+      <rule id="r_high_spend_strong_supplier">
+        <inputEntry><text>&gt;= 5000000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 80</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"STANDARD"</text></outputEntry>
+        <outputEntry><text>"PROCUREMENT_DIRECTOR"</text></outputEntry>
+      </rule>
+      <rule id="r_small_low_risk_auto">
+        <inputEntry><text>&lt;= 500000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 70</text></inputEntry>
+        <inputEntry><text>"LOW"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"LIGHT"</text></outputEntry>
+        <outputEntry><text>"AUTO"</text></outputEntry>
+      </rule>
+      <rule id="r_medium_risk_standard">
+        <inputEntry><text>[500000001..4999999999]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>[60..79]</text></inputEntry>
+        <inputEntry><text>"MEDIUM"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"STANDARD"</text></outputEntry>
+        <outputEntry><text>"PROCUREMENT_MANAGER"</text></outputEntry>
+      </rule>
+      <rule id="r_default_due_diligence">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"DUE_DILIGENCE"</text></outputEntry>
+        <outputEntry><text>"ENHANCED"</text></outputEntry>
+        <outputEntry><text>"SUPPLIER_RISK"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

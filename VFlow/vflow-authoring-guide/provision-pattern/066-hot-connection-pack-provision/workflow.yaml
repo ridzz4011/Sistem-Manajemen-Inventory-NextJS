@@ -1,0 +1,129 @@
+version: "3.0"
+metadata:
+  id: hot-connection-pack-provision
+  name: "Hot Connection Pack Provision"
+  description: |
+    Demonstrates a workflow that depends on a runtime-provisioned connection
+    pack. The pack owns PostgreSQL and NATS upstream connections; this workflow
+    only references them through pack-scoped connector refs.
+  dialect: vflow
+  tags: [example, provision, pack, postgres, nats, upstream]
+
+spec:
+  activities:
+    # Client masuk ke VFlow lewat webhook ini. Dari sisi VFlow, ini bukan
+    # upstream; ini trigger inbound.
+    - id: trigger
+      activity_type: Trigger
+      trigger_config:
+        trigger_type: webhook
+        webhook_config: { path: /examples/hot-pack/orders, method: POST }
+        response_framing: length_prefixed
+        end_activity: respond
+      output_variable: trigger_payload
+
+    # Bentuk payload dibuat eksplisit supaya step connector di bawah tidak
+    # membaca body request langsung.
+    - id: normalize_order
+      activity_type: Transform
+      input_mappings:
+        - target: order
+          source:
+            language: v-cel
+            source: >
+              {
+                "order_id": trigger_payload.body.order_id,
+                "customer_id": trigger_payload.body.customer_id,
+                "amount_cents": trigger_payload.body.amount_cents,
+                "currency": trigger_payload.body.currency,
+                "source": "hot_connection_pack"
+              }
+      output_variable: order
+
+    # Upstream database call. Koneksi "primary" berasal dari pack.yaml, bukan
+    # dari env server yang harus direstart.
+    - id: write_order
+      activity_type: Connector
+      persistence: ssot
+      connector_config:
+        connector_ref: "pack://examples/hot-connection-pack/primary"
+        operation: raw_query
+        timeout_ms: 3000
+      input_mappings:
+        - target: query
+          source:
+            language: vil_query
+            dialect: postgres
+            source: |
+              insert("example_orders")
+                .insert_columns("order_id, customer_id, amount_cents, currency")
+                .value(order.order_id)
+                .value(order.customer_id)
+                .value(order.amount_cents)
+                .value(order.currency)
+      output_variable: write_result
+
+    # Upstream NATS call. HTTP outbound tidak perlu connection registry, tetapi
+    # NATS perlu karena punya koneksi/pool/client state.
+    - id: publish_order_event
+      activity_type: Connector
+      connector_config:
+        connector_ref: "pack://examples/hot-connection-pack/events"
+        operation: publish
+        timeout_ms: 3000
+      input_mappings:
+        - target: subject
+          source: { language: literal, source: "examples.hot_pack.orders.accepted" }
+        - target: payload
+          source:
+            language: v-cel
+            source: >
+              {
+                "event_type": "order.accepted",
+                "order_id": order.order_id,
+                "customer_id": order.customer_id,
+                "amount_cents": order.amount_cents,
+                "currency": order.currency
+              }
+      output_variable: publish_result
+
+    - id: build_response
+      activity_type: Transform
+      input_mappings:
+        - target: response
+          source:
+            language: v-cel
+            source: >
+              {
+                "status": "accepted",
+                "order_id": order.order_id,
+                "db": write_result,
+                "event": publish_result
+              }
+      output_variable: response
+
+    - id: respond
+      activity_type: EndTrigger
+      end_trigger_config:
+        trigger_ref: trigger
+        final_response:
+          language: spv1
+          source: "$.response"
+
+    - id: end
+      activity_type: End
+
+  flows:
+    - { id: f01, from: { node: trigger }, to: { node: normalize_order } }
+    - { id: f02, from: { node: normalize_order }, to: { node: write_order } }
+    - { id: f03, from: { node: write_order }, to: { node: publish_order_event } }
+    - { id: f04, from: { node: publish_order_event }, to: { node: build_response } }
+    - { id: f05, from: { node: build_response }, to: { node: respond } }
+    - { id: f06, from: { node: respond }, to: { node: end } }
+
+  variables:
+    - { name: trigger_payload, type: object }
+    - { name: order, type: object }
+    - { name: write_result, type: object }
+    - { name: publish_result, type: object }
+    - { name: response, type: object }

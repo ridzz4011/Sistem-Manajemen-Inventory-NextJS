@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_retail_credit_limit" name="Retail Credit Limit Eligibility" namespace="https://vastar.id/examples/conversion/retail-credit-limit">
+  <decision id="d_retail_credit_limit" name="Retail Credit Limit Eligibility">
+    <decisionTable id="dt_retail_credit_limit" hitPolicy="FIRST">
+      <input id="i_age" label="Applicant age">
+        <inputExpression typeRef="number"><text>applicant.age</text></inputExpression>
+      </input>
+      <input id="i_income" label="Monthly income">
+        <inputExpression typeRef="number"><text>applicant.monthlyIncome</text></inputExpression>
+      </input>
+      <input id="i_credit_score" label="Credit score">
+        <inputExpression typeRef="number"><text>applicant.creditScore</text></inputExpression>
+      </input>
+      <input id="i_tier" label="Relationship tier">
+        <inputExpression typeRef="string"><text>applicant.relationshipTier</text></inputExpression>
+      </input>
+      <input id="i_delinquency" label="Existing delinquency">
+        <inputExpression typeRef="boolean"><text>applicant.hasActiveDelinquency</text></inputExpression>
+      </input>
+      <output id="o_decision" name="decision" typeRef="string"/>
+      <output id="o_limit" name="limitBand" typeRef="string"/>
+      <output id="o_reason" name="reasonCode" typeRef="string"/>
+      <rule id="r_reject_minor">
+        <inputEntry><text>&lt; 21</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"AGE_BELOW_POLICY"</text></outputEntry>
+      </rule>
+      <rule id="r_reject_active_delinquency">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"ACTIVE_DELINQUENCY"</text></outputEntry>
+      </rule>
+      <rule id="r_premier_high_limit">
+        <inputEntry><text>&gt;= 25</text></inputEntry>
+        <inputEntry><text>&gt;= 50000000</text></inputEntry>
+        <inputEntry><text>&gt;= 780</text></inputEntry>
+        <inputEntry><text>"PRIVATE","PRIORITY"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"HIGH"</text></outputEntry>
+        <outputEntry><text>"PRIME_RELATIONSHIP"</text></outputEntry>
+      </rule>
+      <rule id="r_gold_high_limit">
+        <inputEntry><text>&gt;= 23</text></inputEntry>
+        <inputEntry><text>&gt;= 25000000</text></inputEntry>
+        <inputEntry><text>[720..779]</text></inputEntry>
+        <inputEntry><text>"GOLD","PRIORITY"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"HIGH"</text></outputEntry>
+        <outputEntry><text>"STRONG_PROFILE"</text></outputEntry>
+      </rule>
+      <rule id="r_standard_medium_limit">
+        <inputEntry><text>&gt;= 23</text></inputEntry>
+        <inputEntry><text>[12000000..24999999]</text></inputEntry>
+        <inputEntry><text>[660..719]</text></inputEntry>
+        <inputEntry><text>"SILVER","STANDARD","GOLD"</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>"AFFORDABILITY_OK"</text></outputEntry>
+      </rule>
+      <rule id="r_manual_review_thin_file">
+        <inputEntry><text>&gt;= 21</text></inputEntry>
+        <inputEntry><text>[8000000..11999999]</text></inputEntry>
+        <inputEntry><text>[620..659]</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>"LOW"</text></outputEntry>
+        <outputEntry><text>"THIN_OR_BORDERLINE_FILE"</text></outputEntry>
+      </rule>
+      <rule id="r_reject_low_score">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt; 620</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"CREDIT_SCORE_BELOW_MINIMUM"</text></outputEntry>
+      </rule>
+      <rule id="r_default_review">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>"LOW"</text></outputEntry>
+        <outputEntry><text>"POLICY_REVIEW_REQUIRED"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

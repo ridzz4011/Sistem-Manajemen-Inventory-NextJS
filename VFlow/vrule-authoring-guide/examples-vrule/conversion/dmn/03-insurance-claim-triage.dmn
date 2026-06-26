@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_claim_triage" name="Insurance Claim Triage" namespace="https://vastar.id/examples/conversion/claim-triage">
+  <decision id="d_claim_triage" name="Insurance Claim Triage">
+    <decisionTable id="dt_claim_triage" hitPolicy="FIRST">
+      <input id="i_amount" label="Claim amount">
+        <inputExpression typeRef="number"><text>claim.amount</text></inputExpression>
+      </input>
+      <input id="i_policy_age" label="Policy age days">
+        <inputExpression typeRef="number"><text>claim.policyAgeDays</text></inputExpression>
+      </input>
+      <input id="i_fraud_score" label="Fraud score">
+        <inputExpression typeRef="number"><text>claim.fraudScore</text></inputExpression>
+      </input>
+      <input id="i_incident" label="Incident type">
+        <inputExpression typeRef="string"><text>claim.incidentType</text></inputExpression>
+      </input>
+      <input id="i_docs" label="Documentation complete">
+        <inputExpression typeRef="boolean"><text>claim.documentationComplete</text></inputExpression>
+      </input>
+      <output id="o_route" name="route" typeRef="string"/>
+      <output id="o_reserve" name="reserveBand" typeRef="string"/>
+      <output id="o_sla" name="slaHours" typeRef="number"/>
+      <rule id="r_incomplete_large_claim">
+        <inputEntry><text>&gt;= 100000000</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"PENDING_DOCUMENTS"</text></outputEntry>
+        <outputEntry><text>"HIGH"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+      <rule id="r_high_fraud_any_amount">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt;= 85</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"SIU_INVESTIGATION"</text></outputEntry>
+        <outputEntry><text>"HOLD"</text></outputEntry>
+        <outputEntry><text>4</text></outputEntry>
+      </rule>
+      <rule id="r_new_policy_high_value_theft">
+        <inputEntry><text>&gt;= 50000000</text></inputEntry>
+        <inputEntry><text>&lt; 90</text></inputEntry>
+        <inputEntry><text>&gt;= 65</text></inputEntry>
+        <inputEntry><text>"THEFT","TOTAL_LOSS"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"SENIOR_ADJUSTER"</text></outputEntry>
+        <outputEntry><text>"HIGH"</text></outputEntry>
+        <outputEntry><text>8</text></outputEntry>
+      </rule>
+      <rule id="r_catastrophe_fast_track">
+        <inputEntry><text>&lt;= 25000000</text></inputEntry>
+        <inputEntry><text>&gt;= 90</text></inputEntry>
+        <inputEntry><text>&lt; 50</text></inputEntry>
+        <inputEntry><text>"FLOOD","EARTHQUAKE","WINDSTORM"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"CAT_FAST_TRACK"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>12</text></outputEntry>
+      </rule>
+      <rule id="r_low_value_auto_approve">
+        <inputEntry><text>&lt;= 5000000</text></inputEntry>
+        <inputEntry><text>&gt;= 180</text></inputEntry>
+        <inputEntry><text>&lt; 40</text></inputEntry>
+        <inputEntry><text>"GLASS","MINOR_DAMAGE","BAGGAGE"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"AUTO_APPROVE"</text></outputEntry>
+        <outputEntry><text>"LOW"</text></outputEntry>
+        <outputEntry><text>2</text></outputEntry>
+      </rule>
+      <rule id="r_medical_manual_review">
+        <inputEntry><text>[5000000..50000000]</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>[40..64]</text></inputEntry>
+        <inputEntry><text>"MEDICAL","PERSONAL_ACCIDENT"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"MEDICAL_REVIEW"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+      <rule id="r_standard_adjuster">
+        <inputEntry><text>[5000001..49999999]</text></inputEntry>
+        <inputEntry><text>&gt;= 90</text></inputEntry>
+        <inputEntry><text>&lt; 65</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"STANDARD_ADJUSTER"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+      <rule id="r_default_complex">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"COMPLEX_REVIEW"</text></outputEntry>
+        <outputEntry><text>"MEDIUM"</text></outputEntry>
+        <outputEntry><text>48</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

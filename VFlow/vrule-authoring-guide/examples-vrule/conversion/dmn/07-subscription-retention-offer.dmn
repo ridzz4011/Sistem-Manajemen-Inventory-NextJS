@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_subscription_retention" name="Subscription Retention Offer" namespace="https://vastar.id/examples/conversion/subscription-retention">
+  <decision id="d_retention_offer" name="Subscription Retention Offer">
+    <decisionTable id="dt_retention_offer" hitPolicy="FIRST">
+      <input id="i_tenure" label="Tenure months">
+        <inputExpression typeRef="number"><text>account.tenureMonths</text></inputExpression>
+      </input>
+      <input id="i_mrr" label="Monthly recurring revenue">
+        <inputExpression typeRef="number"><text>account.mrr</text></inputExpression>
+      </input>
+      <input id="i_usage_drop" label="Usage drop percent">
+        <inputExpression typeRef="number"><text>account.usageDropPct</text></inputExpression>
+      </input>
+      <input id="i_nps" label="NPS score">
+        <inputExpression typeRef="number"><text>account.npsScore</text></inputExpression>
+      </input>
+      <input id="i_tickets" label="Support tickets in 30 days">
+        <inputExpression typeRef="number"><text>account.supportTickets30d</text></inputExpression>
+      </input>
+      <input id="i_plan" label="Plan tier">
+        <inputExpression typeRef="string"><text>account.planTier</text></inputExpression>
+      </input>
+      <output id="o_action" name="retentionAction" typeRef="string"/>
+      <output id="o_offer" name="offerPercent" typeRef="number"/>
+      <output id="o_playbook" name="playbook" typeRef="string"/>
+      <rule id="r_enterprise_escalation">
+        <inputEntry><text>&gt;= 12</text></inputEntry>
+        <inputEntry><text>&gt;= 50000000</text></inputEntry>
+        <inputEntry><text>&gt;= 50</text></inputEntry>
+        <inputEntry><text>&lt;= 0</text></inputEntry>
+        <inputEntry><text>&gt;= 3</text></inputEntry>
+        <inputEntry><text>"ENTERPRISE"</text></inputEntry>
+        <outputEntry><text>"EXECUTIVE_SAVE"</text></outputEntry>
+        <outputEntry><text>20</text></outputEntry>
+        <outputEntry><text>"EXECUTIVE_SPONSORSHIP"</text></outputEntry>
+      </rule>
+      <rule id="r_high_value_low_nps">
+        <inputEntry><text>&gt;= 6</text></inputEntry>
+        <inputEntry><text>&gt;= 10000000</text></inputEntry>
+        <inputEntry><text>&gt;= 35</text></inputEntry>
+        <inputEntry><text>&lt;= 3</text></inputEntry>
+        <inputEntry><text>&gt;= 2</text></inputEntry>
+        <inputEntry><text>"PRO","BUSINESS","ENTERPRISE"</text></inputEntry>
+        <outputEntry><text>"CSM_INTERVENTION"</text></outputEntry>
+        <outputEntry><text>15</text></outputEntry>
+        <outputEntry><text>"SERVICE_RECOVERY"</text></outputEntry>
+      </rule>
+      <rule id="r_new_customer_enablement">
+        <inputEntry><text>&lt; 3</text></inputEntry>
+        <inputEntry><text>&gt;= 1000000</text></inputEntry>
+        <inputEntry><text>&gt;= 40</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt;= 1</text></inputEntry>
+        <inputEntry><text>"STARTER","PRO"</text></inputEntry>
+        <outputEntry><text>"ENABLEMENT_SAVE"</text></outputEntry>
+        <outputEntry><text>0</text></outputEntry>
+        <outputEntry><text>"ONBOARDING_RESCUE"</text></outputEntry>
+      </rule>
+      <rule id="r_discount_eligible">
+        <inputEntry><text>[3..24]</text></inputEntry>
+        <inputEntry><text>[2000000..9999999]</text></inputEntry>
+        <inputEntry><text>[25..49]</text></inputEntry>
+        <inputEntry><text>[0..6]</text></inputEntry>
+        <inputEntry><text>[0..2]</text></inputEntry>
+        <inputEntry><text>"STARTER","PRO","BUSINESS"</text></inputEntry>
+        <outputEntry><text>"SAVE_OFFER"</text></outputEntry>
+        <outputEntry><text>10</text></outputEntry>
+        <outputEntry><text>"VALUE_REINFORCEMENT"</text></outputEntry>
+      </rule>
+      <rule id="r_product_training">
+        <inputEntry><text>&gt;= 6</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt;= 50</text></inputEntry>
+        <inputEntry><text>&gt; 6</text></inputEntry>
+        <inputEntry><text>&lt;= 1</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"PRODUCT_TRAINING"</text></outputEntry>
+        <outputEntry><text>0</text></outputEntry>
+        <outputEntry><text>"ADOPTION_COACHING"</text></outputEntry>
+      </rule>
+      <rule id="r_no_offer_high_satisfaction">
+        <inputEntry><text>&gt;= 12</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt; 20</text></inputEntry>
+        <inputEntry><text>&gt;= 8</text></inputEntry>
+        <inputEntry><text>0</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"RENEWAL_NURTURE"</text></outputEntry>
+        <outputEntry><text>0</text></outputEntry>
+        <outputEntry><text>"STANDARD_SUCCESS_TOUCH"</text></outputEntry>
+      </rule>
+      <rule id="r_support_recovery">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt;= 5</text></inputEntry>
+        <inputEntry><text>&gt;= 4</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"SUPPORT_RECOVERY"</text></outputEntry>
+        <outputEntry><text>5</text></outputEntry>
+        <outputEntry><text>"TICKET_ROOT_CAUSE"</text></outputEntry>
+      </rule>
+      <rule id="r_default_monitor">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"MONITOR"</text></outputEntry>
+        <outputEntry><text>0</text></outputEntry>
+        <outputEntry><text>"HEALTH_SCORE_WATCH"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

@@ -1,0 +1,139 @@
+# decision: Commercial Loan Covenant Status (d_commercial_covenant_status)
+version: 1
+decision_id: d_commercial_covenant_status
+decision_name: Commercial Loan Covenant Status
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: borrower_dscr
+      type: number
+      expression: borrower.dscr
+      label: Debt service coverage ratio
+    - name: borrower_leverageRatio
+      type: number
+      expression: borrower.leverageRatio
+      label: Leverage ratio
+    - name: borrower_liquidityDays
+      type: number
+      expression: borrower.liquidityDays
+      label: Liquidity runway days
+    - name: borrower_auditStatus
+      type: string
+      expression: borrower.auditStatus
+      label: Audit status
+    - name: borrower_covenantBreachCount
+      type: number
+      expression: borrower.covenantBreachCount
+      label: Covenant breach count
+  outputs:
+    - name: covenantStatus
+      type: string
+    - name: reviewLevel
+      type: string
+    - name: actionCode
+      type: string
+rules:
+  - id: r_event_default
+    description: dmn rule r_event_default
+    when: borrower.auditStatus IN ["QUALIFIED_OPINION", "GOING_CONCERN"]
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "BREACH"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "EXECUTIVE_CREDIT"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "TRIGGER_EVENT_OF_DEFAULT"
+  - id: r_multiple_breach_watchlist
+    description: dmn rule r_multiple_breach_watchlist
+    when: borrower.covenantBreachCount >= 3
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "BREACH"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "SPECIAL_ASSETS"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "ESCALATE_REPEAT_BREACH"
+  - id: r_low_dscr_high_leverage
+    description: dmn rule r_low_dscr_high_leverage
+    when: borrower.dscr < 1.10 AND borrower.leverageRatio > 4.50
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "BREACH"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "CREDIT_COMMITTEE"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "RESTRUCTURE_REVIEW"
+  - id: r_liquidity_pressure
+    description: dmn rule r_liquidity_pressure
+    when: borrower.dscr >= 1.10 AND borrower.dscr <= 1.25 AND borrower.leverageRatio >= 3.50 AND borrower.leverageRatio <= 4.50 AND borrower.liquidityDays < 45 AND borrower.auditStatus IN ["CLEAN", "UNREVIEWED"] AND borrower.covenantBreachCount >= 1 AND borrower.covenantBreachCount <= 2
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "WAIVER_REQUIRED"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "SENIOR_CREDIT"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "REQUEST_30_DAY_PLAN"
+  - id: r_soft_warning
+    description: dmn rule r_soft_warning
+    when: borrower.dscr >= 1.25 AND borrower.dscr <= 1.50 AND borrower.leverageRatio >= 3.00 AND borrower.leverageRatio <= 3.75 AND borrower.liquidityDays >= 45 AND borrower.liquidityDays <= 90 AND borrower.auditStatus == "CLEAN" AND borrower.covenantBreachCount == 0
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "WATCH"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "PORTFOLIO_MANAGER"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "MONTHLY_MONITORING"
+  - id: r_stable_but_unaudited
+    description: dmn rule r_stable_but_unaudited
+    when: borrower.dscr >= 1.50 AND borrower.leverageRatio <= 3.00 AND borrower.liquidityDays >= 90 AND borrower.auditStatus == "UNREVIEWED" AND borrower.covenantBreachCount == 0
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "COMPLIANT"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "RELATIONSHIP_MANAGER"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "OBTAIN_AUDIT_CONFIRMATION"
+  - id: r_strong_compliant
+    description: dmn rule r_strong_compliant
+    when: borrower.dscr >= 1.50 AND borrower.leverageRatio <= 3.00 AND borrower.liquidityDays >= 90 AND borrower.auditStatus == "CLEAN" AND borrower.covenantBreachCount == 0
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "COMPLIANT"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "AUTO_FILE"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "NO_ACTION"
+  - id: r_default_review
+    description: dmn rule r_default_review
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.covenantStatus
+        value: "WATCH"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.reviewLevel
+        value: "SENIOR_CREDIT"
+      - kind: SET_FIELD
+        path: Commercial_Loan_Covenant_Status.actionCode
+        value: "MANUAL_COVENANT_REVIEW"

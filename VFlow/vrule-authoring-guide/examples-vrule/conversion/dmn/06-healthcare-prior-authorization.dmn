@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_healthcare_prior_auth" name="Healthcare Prior Authorization" namespace="https://vastar.id/examples/conversion/healthcare-prior-auth">
+  <decision id="d_prior_authorization" name="Healthcare Prior Authorization">
+    <decisionTable id="dt_prior_authorization" hitPolicy="FIRST">
+      <input id="i_risk" label="Procedure risk">
+        <inputExpression typeRef="string"><text>request.procedureRisk</text></inputExpression>
+      </input>
+      <input id="i_urgency" label="Clinical urgency">
+        <inputExpression typeRef="string"><text>request.clinicalUrgency</text></inputExpression>
+      </input>
+      <input id="i_age" label="Member age">
+        <inputExpression typeRef="number"><text>request.memberAge</text></inputExpression>
+      </input>
+      <input id="i_guideline" label="Guideline matched">
+        <inputExpression typeRef="boolean"><text>request.guidelineMatched</text></inputExpression>
+      </input>
+      <input id="i_cost" label="Estimated cost">
+        <inputExpression typeRef="number"><text>request.estimatedCost</text></inputExpression>
+      </input>
+      <input id="i_denials" label="Prior denials">
+        <inputExpression typeRef="number"><text>request.priorDenials</text></inputExpression>
+      </input>
+      <output id="o_authorization" name="authorization" typeRef="string"/>
+      <output id="o_sla" name="slaHours" typeRef="number"/>
+      <output id="o_review" name="reviewQueue" typeRef="string"/>
+      <rule id="r_emergency_auto_approve">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"EMERGENCY"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>1</text></outputEntry>
+        <outputEntry><text>"AUTO_EMERGENCY"</text></outputEntry>
+      </rule>
+      <rule id="r_high_risk_no_guideline">
+        <inputEntry><text>"HIGH"</text></inputEntry>
+        <inputEntry><text>"ELECTIVE","ROUTINE"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt;= 50000000</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"DENY"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+        <outputEntry><text>"MEDICAL_DIRECTOR"</text></outputEntry>
+      </rule>
+      <rule id="r_repeat_denials_escalate">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt;= 3</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>12</text></outputEntry>
+        <outputEntry><text>"APPEALS_CLINICIAN"</text></outputEntry>
+      </rule>
+      <rule id="r_senior_high_cost_review">
+        <inputEntry><text>"MEDIUM","HIGH"</text></inputEntry>
+        <inputEntry><text>"ROUTINE"</text></inputEntry>
+        <inputEntry><text>&gt;= 65</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&gt;= 75000000</text></inputEntry>
+        <inputEntry><text>&lt; 3</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+        <outputEntry><text>"SENIOR_NURSE_REVIEW"</text></outputEntry>
+      </rule>
+      <rule id="r_guideline_low_risk_auto">
+        <inputEntry><text>"LOW"</text></inputEntry>
+        <inputEntry><text>"ROUTINE","ELECTIVE"</text></inputEntry>
+        <inputEntry><text>[18..64]</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&lt;= 15000000</text></inputEntry>
+        <inputEntry><text>0</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>4</text></outputEntry>
+        <outputEntry><text>"AUTO_STANDARD"</text></outputEntry>
+      </rule>
+      <rule id="r_pediatric_specialist_review">
+        <inputEntry><text>"MEDIUM","HIGH"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt; 18</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt;= 2</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>8</text></outputEntry>
+        <outputEntry><text>"PEDIATRIC_SPECIALIST"</text></outputEntry>
+      </rule>
+      <rule id="r_urgent_guideline_review">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"URGENT"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&lt;= 2</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>2</text></outputEntry>
+        <outputEntry><text>"RAPID_CLINICAL_REVIEW"</text></outputEntry>
+      </rule>
+      <rule id="r_default_clinical_review">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REFER"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+        <outputEntry><text>"CLINICAL_REVIEW"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

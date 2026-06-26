@@ -1,0 +1,151 @@
+# decision: Healthcare Prior Authorization (d_prior_authorization)
+version: 1
+decision_id: d_prior_authorization
+decision_name: Healthcare Prior Authorization
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: request_procedureRisk
+      type: string
+      expression: request.procedureRisk
+      label: Procedure risk
+    - name: request_clinicalUrgency
+      type: string
+      expression: request.clinicalUrgency
+      label: Clinical urgency
+    - name: request_memberAge
+      type: number
+      expression: request.memberAge
+      label: Member age
+    - name: request_guidelineMatched
+      type: boolean
+      expression: request.guidelineMatched
+      label: Guideline matched
+    - name: request_estimatedCost
+      type: number
+      expression: request.estimatedCost
+      label: Estimated cost
+    - name: request_priorDenials
+      type: number
+      expression: request.priorDenials
+      label: Prior denials
+  outputs:
+    - name: authorization
+      type: string
+    - name: slaHours
+      type: number
+    - name: reviewQueue
+      type: string
+rules:
+  - id: r_emergency_auto_approve
+    description: dmn rule r_emergency_auto_approve
+    when: request.clinicalUrgency == "EMERGENCY" AND request.guidelineMatched == true
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "APPROVE"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          1
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "AUTO_EMERGENCY"
+  - id: r_high_risk_no_guideline
+    description: dmn rule r_high_risk_no_guideline
+    when: request.procedureRisk == "HIGH" AND request.clinicalUrgency IN ["ELECTIVE", "ROUTINE"] AND request.guidelineMatched == false AND request.estimatedCost >= 50000000
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "DENY"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          24
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "MEDICAL_DIRECTOR"
+  - id: r_repeat_denials_escalate
+    description: dmn rule r_repeat_denials_escalate
+    when: request.priorDenials >= 3
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "REFER"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          12
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "APPEALS_CLINICIAN"
+  - id: r_senior_high_cost_review
+    description: dmn rule r_senior_high_cost_review
+    when: request.procedureRisk IN ["MEDIUM", "HIGH"] AND request.clinicalUrgency == "ROUTINE" AND request.memberAge >= 65 AND request.guidelineMatched == true AND request.estimatedCost >= 75000000 AND request.priorDenials < 3
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "REFER"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          24
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "SENIOR_NURSE_REVIEW"
+  - id: r_guideline_low_risk_auto
+    description: dmn rule r_guideline_low_risk_auto
+    when: request.procedureRisk == "LOW" AND request.clinicalUrgency IN ["ROUTINE", "ELECTIVE"] AND request.memberAge >= 18 AND request.memberAge <= 64 AND request.guidelineMatched == true AND request.estimatedCost <= 15000000 AND request.priorDenials == 0
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "APPROVE"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          4
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "AUTO_STANDARD"
+  - id: r_pediatric_specialist_review
+    description: dmn rule r_pediatric_specialist_review
+    when: request.procedureRisk IN ["MEDIUM", "HIGH"] AND request.memberAge < 18 AND request.guidelineMatched == true AND request.priorDenials <= 2
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "REFER"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          8
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "PEDIATRIC_SPECIALIST"
+  - id: r_urgent_guideline_review
+    description: dmn rule r_urgent_guideline_review
+    when: request.clinicalUrgency == "URGENT" AND request.guidelineMatched == true AND request.priorDenials <= 2
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "APPROVE"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          2
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "RAPID_CLINICAL_REVIEW"
+  - id: r_default_clinical_review
+    description: dmn rule r_default_clinical_review
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.authorization
+        value: "REFER"
+      - kind: EVAL_SET_FIELD
+        path: Healthcare_Prior_Authorization.slaHours
+        expr: >-
+          24
+      - kind: SET_FIELD
+        path: Healthcare_Prior_Authorization.reviewQueue
+        value: "CLINICAL_REVIEW"

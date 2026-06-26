@@ -1,0 +1,143 @@
+# decision: Logistics Exception Routing (d_logistics_exception_route)
+version: 1
+decision_id: d_logistics_exception_route
+decision_name: Logistics Exception Routing
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: shipment_delayHours
+      type: number
+      expression: shipment.delayHours
+      label: Delay hours
+    - name: shipment_temperatureExcursion
+      type: boolean
+      expression: shipment.temperatureExcursion
+      label: Temperature excursion
+    - name: shipment_value
+      type: number
+      expression: shipment.value
+      label: Shipment value
+    - name: shipment_laneRisk
+      type: string
+      expression: shipment.laneRisk
+      label: Lane risk
+    - name: shipment_customsHold
+      type: boolean
+      expression: shipment.customsHold
+      label: Customs hold
+    - name: shipment_customerSegment
+      type: string
+      expression: shipment.customerSegment
+      label: Customer segment
+  outputs:
+    - name: exceptionRoute
+      type: string
+    - name: escalationLevel
+      type: string
+    - name: customerNotice
+      type: string
+rules:
+  - id: r_cold_chain_breach
+    description: dmn rule r_cold_chain_breach
+    when: shipment.temperatureExcursion == true
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "QUALITY_HOLD"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "CRITICAL"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "IMMEDIATE_CONTACT"
+  - id: r_strategic_high_value_delay
+    description: dmn rule r_strategic_high_value_delay
+    when: shipment.delayHours >= 24 AND shipment.temperatureExcursion == false AND shipment.value >= 1000000000 AND shipment.laneRisk IN ["MEDIUM", "HIGH"] AND shipment.customerSegment IN ["STRATEGIC", "ENTERPRISE"]
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "CONTROL_TOWER"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "EXECUTIVE"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "PROACTIVE_RECOVERY_PLAN"
+  - id: r_customs_hold_priority
+    description: dmn rule r_customs_hold_priority
+    when: shipment.delayHours >= 12 AND shipment.temperatureExcursion == false AND shipment.value >= 250000000 AND shipment.laneRisk == "HIGH" AND shipment.customsHold == true
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "CUSTOMS_BROKER_ESCALATION"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "HIGH"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "CUSTOMS_DELAY_NOTICE"
+  - id: r_express_delay_recovery
+    description: dmn rule r_express_delay_recovery
+    when: shipment.delayHours >= 6 AND shipment.delayHours <= 23 AND shipment.temperatureExcursion == false AND shipment.laneRisk IN ["LOW", "MEDIUM"] AND shipment.customsHold == false AND shipment.customerSegment IN ["PREMIUM", "ENTERPRISE"]
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "EXPEDITE_REPLAN"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "MEDIUM"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "ETA_RECOVERY_NOTICE"
+  - id: r_low_value_delay_standard
+    description: dmn rule r_low_value_delay_standard
+    when: shipment.delayHours >= 12 AND shipment.delayHours <= 48 AND shipment.temperatureExcursion == false AND shipment.value < 50000000 AND shipment.laneRisk == "LOW" AND shipment.customsHold == false AND shipment.customerSegment == "STANDARD"
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "STANDARD_EXCEPTION_QUEUE"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "LOW"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "STANDARD_DELAY_NOTICE"
+  - id: r_high_risk_lane_watch
+    description: dmn rule r_high_risk_lane_watch
+    when: shipment.delayHours >= 1 AND shipment.delayHours <= 11 AND shipment.temperatureExcursion == false AND shipment.laneRisk == "HIGH" AND shipment.customsHold == false
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "LANE_WATCH"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "MEDIUM"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "NO_NOTICE_YET"
+  - id: r_no_exception
+    description: dmn rule r_no_exception
+    when: shipment.delayHours < 1 AND shipment.temperatureExcursion == false AND shipment.customsHold == false
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "NO_ACTION"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "NONE"
+  - id: r_default_ops_review
+    description: dmn rule r_default_ops_review
+    when: shipment.temperatureExcursion == false
+    then:
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.exceptionRoute
+        value: "OPERATIONS_REVIEW"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.escalationLevel
+        value: "MEDIUM"
+      - kind: SET_FIELD
+        path: Logistics_Exception_Routing.customerNotice
+        value: "PENDING_ASSESSMENT"

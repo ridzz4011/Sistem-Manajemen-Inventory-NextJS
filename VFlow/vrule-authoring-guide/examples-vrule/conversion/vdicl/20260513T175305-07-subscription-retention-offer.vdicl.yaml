@@ -1,0 +1,151 @@
+# decision: Subscription Retention Offer (d_retention_offer)
+version: 1
+decision_id: d_retention_offer
+decision_name: Subscription Retention Offer
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: account_tenureMonths
+      type: number
+      expression: account.tenureMonths
+      label: Tenure months
+    - name: account_mrr
+      type: number
+      expression: account.mrr
+      label: Monthly recurring revenue
+    - name: account_usageDropPct
+      type: number
+      expression: account.usageDropPct
+      label: Usage drop percent
+    - name: account_npsScore
+      type: number
+      expression: account.npsScore
+      label: NPS score
+    - name: account_supportTickets30d
+      type: number
+      expression: account.supportTickets30d
+      label: Support tickets in 30 days
+    - name: account_planTier
+      type: string
+      expression: account.planTier
+      label: Plan tier
+  outputs:
+    - name: retentionAction
+      type: string
+    - name: offerPercent
+      type: number
+    - name: playbook
+      type: string
+rules:
+  - id: r_enterprise_escalation
+    description: dmn rule r_enterprise_escalation
+    when: account.tenureMonths >= 12 AND account.mrr >= 50000000 AND account.usageDropPct >= 50 AND account.npsScore <= 0 AND account.supportTickets30d >= 3 AND account.planTier == "ENTERPRISE"
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "EXECUTIVE_SAVE"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          20
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "EXECUTIVE_SPONSORSHIP"
+  - id: r_high_value_low_nps
+    description: dmn rule r_high_value_low_nps
+    when: account.tenureMonths >= 6 AND account.mrr >= 10000000 AND account.usageDropPct >= 35 AND account.npsScore <= 3 AND account.supportTickets30d >= 2 AND account.planTier IN ["PRO", "BUSINESS", "ENTERPRISE"]
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "CSM_INTERVENTION"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          15
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "SERVICE_RECOVERY"
+  - id: r_new_customer_enablement
+    description: dmn rule r_new_customer_enablement
+    when: account.tenureMonths < 3 AND account.mrr >= 1000000 AND account.usageDropPct >= 40 AND account.supportTickets30d <= 1 AND account.planTier IN ["STARTER", "PRO"]
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "ENABLEMENT_SAVE"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          0
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "ONBOARDING_RESCUE"
+  - id: r_discount_eligible
+    description: dmn rule r_discount_eligible
+    when: account.tenureMonths >= 3 AND account.tenureMonths <= 24 AND account.mrr >= 2000000 AND account.mrr <= 9999999 AND account.usageDropPct >= 25 AND account.usageDropPct <= 49 AND account.npsScore >= 0 AND account.npsScore <= 6 AND account.supportTickets30d >= 0 AND account.supportTickets30d <= 2 AND account.planTier IN ["STARTER", "PRO", "BUSINESS"]
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "SAVE_OFFER"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          10
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "VALUE_REINFORCEMENT"
+  - id: r_product_training
+    description: dmn rule r_product_training
+    when: account.tenureMonths >= 6 AND account.usageDropPct >= 50 AND account.npsScore > 6 AND account.supportTickets30d <= 1
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "PRODUCT_TRAINING"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          0
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "ADOPTION_COACHING"
+  - id: r_no_offer_high_satisfaction
+    description: dmn rule r_no_offer_high_satisfaction
+    when: account.tenureMonths >= 12 AND account.usageDropPct < 20 AND account.npsScore >= 8 AND account.supportTickets30d == 0
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "RENEWAL_NURTURE"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          0
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "STANDARD_SUCCESS_TOUCH"
+  - id: r_support_recovery
+    description: dmn rule r_support_recovery
+    when: account.npsScore <= 5 AND account.supportTickets30d >= 4
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "SUPPORT_RECOVERY"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          5
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "TICKET_ROOT_CAUSE"
+  - id: r_default_monitor
+    description: dmn rule r_default_monitor
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.retentionAction
+        value: "MONITOR"
+      - kind: EVAL_SET_FIELD
+        path: Subscription_Retention_Offer.offerPercent
+        expr: >-
+          0
+      - kind: SET_FIELD
+        path: Subscription_Retention_Offer.playbook
+        value: "HEALTH_SCORE_WATCH"

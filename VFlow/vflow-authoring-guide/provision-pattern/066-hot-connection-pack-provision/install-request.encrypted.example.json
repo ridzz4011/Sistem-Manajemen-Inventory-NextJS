@@ -1,0 +1,18 @@
+{
+  "pack_yaml": "pack:\n  id: examples/hot-connection-pack\n  version: 0.1.0\n  description: Connection-only pack for upstream services.\nconnections:\n  - name: primary\n    kind: postgres\n    url: env://HOT_PACK_POSTGRES_URL\n    pool:\n      max_size: 5\n      min_idle: 1\n      acquire_timeout_ms: 3000\n      idle_timeout_ms: 30000\n  - name: events\n    kind: nats\n    urls: env://HOT_PACK_NATS_URL\n    client_name: vflow-hot-pack-example\nworkflows: []\n",
+  "encrypted_secrets": {
+    "HOT_PACK_POSTGRES_URL": {
+      "alg": "A256GCM",
+      "nonce_b64": "<base64-12-byte-nonce>",
+      "ciphertext_b64": "<base64-ciphertext-and-tag-for-postgresql-dsn>"
+    },
+    "HOT_PACK_NATS_URL": {
+      "alg": "A256GCM",
+      "nonce_b64": "<base64-12-byte-nonce>",
+      "ciphertext_b64": "<base64-ciphertext-and-tag-for-nats-url>"
+    }
+  },
+  "replace": true,
+  "tenant": "_default",
+  "workflow_ids": ["hot-connection-pack-provision"]
+}

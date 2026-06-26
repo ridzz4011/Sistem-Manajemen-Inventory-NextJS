@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_data_privacy_sla" name="Data Privacy Request SLA" namespace="https://vastar.id/examples/conversion/data-privacy-sla">
+  <decision id="d_data_privacy_request_sla" name="Data Privacy Request SLA">
+    <decisionTable id="dt_data_privacy_request_sla" hitPolicy="FIRST">
+      <input id="i_request_type" label="Request type">
+        <inputExpression typeRef="string"><text>privacy.requestType</text></inputExpression>
+      </input>
+      <input id="i_jurisdiction" label="Jurisdiction">
+        <inputExpression typeRef="string"><text>privacy.jurisdiction</text></inputExpression>
+      </input>
+      <input id="i_verified" label="Identity verified">
+        <inputExpression typeRef="boolean"><text>privacy.identityVerified</text></inputExpression>
+      </input>
+      <input id="i_days_open" label="Days open">
+        <inputExpression typeRef="number"><text>privacy.daysOpen</text></inputExpression>
+      </input>
+      <input id="i_sensitivity" label="Data sensitivity">
+        <inputExpression typeRef="string"><text>privacy.dataSensitivity</text></inputExpression>
+      </input>
+      <input id="i_requester" label="Requester type">
+        <inputExpression typeRef="string"><text>privacy.requesterType</text></inputExpression>
+      </input>
+      <output id="o_action" name="action" typeRef="string"/>
+      <output id="o_sla" name="slaStatus" typeRef="string"/>
+      <output id="o_owner" name="ownerQueue" typeRef="string"/>
+      <rule id="r_unverified_stop_clock">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REQUEST_IDENTITY_PROOF"</text></outputEntry>
+        <outputEntry><text>"CLOCK_STOPPED"</text></outputEntry>
+        <outputEntry><text>"PRIVACY_OPERATIONS"</text></outputEntry>
+      </rule>
+      <rule id="r_gdpr_erasure_overdue">
+        <inputEntry><text>"ERASURE","PORTABILITY"</text></inputEntry>
+        <inputEntry><text>"EU","UK"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&gt;= 25</text></inputEntry>
+        <inputEntry><text>"SPECIAL_CATEGORY","HIGH"</text></inputEntry>
+        <inputEntry><text>"DATA_SUBJECT","AUTHORIZED_AGENT"</text></inputEntry>
+        <outputEntry><text>"ESCALATE"</text></outputEntry>
+        <outputEntry><text>"AT_RISK"</text></outputEntry>
+        <outputEntry><text>"DPO"</text></outputEntry>
+      </rule>
+      <rule id="r_ccpa_delete_agent_review">
+        <inputEntry><text>"DELETE","OPT_OUT"</text></inputEntry>
+        <inputEntry><text>"CA","US"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>[15..44]</text></inputEntry>
+        <inputEntry><text>"HIGH","MEDIUM"</text></inputEntry>
+        <inputEntry><text>"AUTHORIZED_AGENT"</text></inputEntry>
+        <outputEntry><text>"LEGAL_REVIEW"</text></outputEntry>
+        <outputEntry><text>"ON_TRACK"</text></outputEntry>
+        <outputEntry><text>"PRIVACY_COUNSEL"</text></outputEntry>
+      </rule>
+      <rule id="r_access_low_risk_auto">
+        <inputEntry><text>"ACCESS"</text></inputEntry>
+        <inputEntry><text>"EU","UK","CA","US","SG"</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&lt;= 10</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>"DATA_SUBJECT"</text></inputEntry>
+        <outputEntry><text>"FULFILL"</text></outputEntry>
+        <outputEntry><text>"ON_TRACK"</text></outputEntry>
+        <outputEntry><text>"PRIVACY_OPERATIONS"</text></outputEntry>
+      </rule>
+      <rule id="r_sensitive_access_review">
+        <inputEntry><text>"ACCESS","RECTIFICATION"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>[0..20]</text></inputEntry>
+        <inputEntry><text>"SPECIAL_CATEGORY","HIGH"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REVIEW_AND_REDACT"</text></outputEntry>
+        <outputEntry><text>"ON_TRACK"</text></outputEntry>
+        <outputEntry><text>"PRIVACY_ANALYST"</text></outputEntry>
+      </rule>
+      <rule id="r_overdue_any_verified">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&gt;= 45</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"ESCALATE"</text></outputEntry>
+        <outputEntry><text>"OVERDUE"</text></outputEntry>
+        <outputEntry><text>"DPO"</text></outputEntry>
+      </rule>
+      <rule id="r_internal_request_route">
+        <inputEntry><text>"ACCESS","RECTIFICATION"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>&lt;= 20</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"EMPLOYEE","CONTRACTOR"</text></inputEntry>
+        <outputEntry><text>"ROUTE_TO_HR_PRIVACY"</text></outputEntry>
+        <outputEntry><text>"ON_TRACK"</text></outputEntry>
+        <outputEntry><text>"HR_PRIVACY"</text></outputEntry>
+      </rule>
+      <rule id="r_default_privacy_ops">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"ASSESS"</text></outputEntry>
+        <outputEntry><text>"ON_TRACK"</text></outputEntry>
+        <outputEntry><text>"PRIVACY_OPERATIONS"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

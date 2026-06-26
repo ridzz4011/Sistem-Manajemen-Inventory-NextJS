@@ -1,0 +1,151 @@
+# decision: AML Case Prioritization (d_aml_case_priority)
+version: 1
+decision_id: d_aml_case_priority
+decision_name: AML Case Prioritization
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: alert_transactionAmount
+      type: number
+      expression: alert.transactionAmount
+      label: Transaction amount
+    - name: alert_pepMatch
+      type: boolean
+      expression: alert.pepMatch
+      label: PEP match
+    - name: alert_jurisdictionRisk
+      type: string
+      expression: alert.jurisdictionRisk
+      label: Jurisdiction risk
+    - name: alert_structuringScore
+      type: number
+      expression: alert.structuringScore
+      label: Structuring score
+    - name: alert_adverseMedia
+      type: boolean
+      expression: alert.adverseMedia
+      label: Adverse media
+    - name: alert_kycAgeDays
+      type: number
+      expression: alert.kycAgeDays
+      label: KYC age days
+  outputs:
+    - name: casePriority
+      type: string
+    - name: disposition
+      type: string
+    - name: slaHours
+      type: number
+rules:
+  - id: r_pep_adverse_media
+    description: dmn rule r_pep_adverse_media
+    when: alert.pepMatch == true AND alert.adverseMedia == true
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P0"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "SAR_REVIEW"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          4
+  - id: r_high_risk_large_structuring
+    description: dmn rule r_high_risk_large_structuring
+    when: alert.transactionAmount >= 1000000000 AND alert.jurisdictionRisk IN ["HIGH", "PROHIBITED"] AND alert.structuringScore >= 85
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P0"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "SAR_REVIEW"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          4
+  - id: r_kyc_stale_high_value
+    description: dmn rule r_kyc_stale_high_value
+    when: alert.transactionAmount >= 500000000 AND alert.pepMatch == false AND alert.jurisdictionRisk IN ["MEDIUM", "HIGH"] AND alert.structuringScore >= 60 AND alert.structuringScore <= 84 AND alert.adverseMedia == false AND alert.kycAgeDays > 365
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P1"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "EDD_REFRESH"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          12
+  - id: r_medium_pattern_review
+    description: dmn rule r_medium_pattern_review
+    when: alert.transactionAmount >= 100000000 AND alert.transactionAmount <= 499999999 AND alert.pepMatch == false AND alert.jurisdictionRisk == "MEDIUM" AND alert.structuringScore >= 50 AND alert.structuringScore <= 79 AND alert.adverseMedia == false AND alert.kycAgeDays <= 365
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P2"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "ANALYST_REVIEW"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          24
+  - id: r_low_amount_pep_match
+    description: dmn rule r_low_amount_pep_match
+    when: alert.transactionAmount < 100000000 AND alert.pepMatch == true AND alert.jurisdictionRisk IN ["LOW", "MEDIUM"] AND alert.structuringScore < 50 AND alert.adverseMedia == false AND alert.kycAgeDays <= 365
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P2"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "PEP_FALSE_POSITIVE_CHECK"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          24
+  - id: r_low_risk_auto_close
+    description: dmn rule r_low_risk_auto_close
+    when: alert.transactionAmount < 50000000 AND alert.pepMatch == false AND alert.jurisdictionRisk == "LOW" AND alert.structuringScore < 35 AND alert.adverseMedia == false AND alert.kycAgeDays <= 180
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P4"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "AUTO_CLOSE"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          72
+  - id: r_jurisdiction_monitor
+    description: dmn rule r_jurisdiction_monitor
+    when: alert.transactionAmount >= 50000000 AND alert.transactionAmount <= 250000000 AND alert.pepMatch == false AND alert.jurisdictionRisk == "HIGH" AND alert.structuringScore < 50 AND alert.adverseMedia == false AND alert.kycAgeDays <= 365
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P3"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "JURISDICTION_MONITOR"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          48
+  - id: r_default_investigate
+    description: dmn rule r_default_investigate
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.casePriority
+        value: "P2"
+      - kind: SET_FIELD
+        path: AML_Case_Prioritization.disposition
+        value: "ANALYST_REVIEW"
+      - kind: EVAL_SET_FIELD
+        path: AML_Case_Prioritization.slaHours
+        expr: >-
+          24

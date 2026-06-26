@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_aml_case_priority" name="AML Case Prioritization" namespace="https://vastar.id/examples/conversion/aml-case-priority">
+  <decision id="d_aml_case_priority" name="AML Case Prioritization">
+    <decisionTable id="dt_aml_case_priority" hitPolicy="FIRST">
+      <input id="i_amount" label="Transaction amount">
+        <inputExpression typeRef="number"><text>alert.transactionAmount</text></inputExpression>
+      </input>
+      <input id="i_pep" label="PEP match">
+        <inputExpression typeRef="boolean"><text>alert.pepMatch</text></inputExpression>
+      </input>
+      <input id="i_jurisdiction" label="Jurisdiction risk">
+        <inputExpression typeRef="string"><text>alert.jurisdictionRisk</text></inputExpression>
+      </input>
+      <input id="i_structuring" label="Structuring score">
+        <inputExpression typeRef="number"><text>alert.structuringScore</text></inputExpression>
+      </input>
+      <input id="i_media" label="Adverse media">
+        <inputExpression typeRef="boolean"><text>alert.adverseMedia</text></inputExpression>
+      </input>
+      <input id="i_kyc_age" label="KYC age days">
+        <inputExpression typeRef="number"><text>alert.kycAgeDays</text></inputExpression>
+      </input>
+      <output id="o_priority" name="casePriority" typeRef="string"/>
+      <output id="o_disposition" name="disposition" typeRef="string"/>
+      <output id="o_sla" name="slaHours" typeRef="number"/>
+      <rule id="r_pep_adverse_media">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"P0"</text></outputEntry>
+        <outputEntry><text>"SAR_REVIEW"</text></outputEntry>
+        <outputEntry><text>4</text></outputEntry>
+      </rule>
+      <rule id="r_high_risk_large_structuring">
+        <inputEntry><text>&gt;= 1000000000</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"HIGH","PROHIBITED"</text></inputEntry>
+        <inputEntry><text>&gt;= 85</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"P0"</text></outputEntry>
+        <outputEntry><text>"SAR_REVIEW"</text></outputEntry>
+        <outputEntry><text>4</text></outputEntry>
+      </rule>
+      <rule id="r_kyc_stale_high_value">
+        <inputEntry><text>&gt;= 500000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"MEDIUM","HIGH"</text></inputEntry>
+        <inputEntry><text>[60..84]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&gt; 365</text></inputEntry>
+        <outputEntry><text>"P1"</text></outputEntry>
+        <outputEntry><text>"EDD_REFRESH"</text></outputEntry>
+        <outputEntry><text>12</text></outputEntry>
+      </rule>
+      <rule id="r_medium_pattern_review">
+        <inputEntry><text>[100000000..499999999]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"MEDIUM"</text></inputEntry>
+        <inputEntry><text>[50..79]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt;= 365</text></inputEntry>
+        <outputEntry><text>"P2"</text></outputEntry>
+        <outputEntry><text>"ANALYST_REVIEW"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+      <rule id="r_low_amount_pep_match">
+        <inputEntry><text>&lt; 100000000</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>&lt; 50</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt;= 365</text></inputEntry>
+        <outputEntry><text>"P2"</text></outputEntry>
+        <outputEntry><text>"PEP_FALSE_POSITIVE_CHECK"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+      <rule id="r_low_risk_auto_close">
+        <inputEntry><text>&lt; 50000000</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"LOW"</text></inputEntry>
+        <inputEntry><text>&lt; 35</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt;= 180</text></inputEntry>
+        <outputEntry><text>"P4"</text></outputEntry>
+        <outputEntry><text>"AUTO_CLOSE"</text></outputEntry>
+        <outputEntry><text>72</text></outputEntry>
+      </rule>
+      <rule id="r_jurisdiction_monitor">
+        <inputEntry><text>[50000000..250000000]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>"HIGH"</text></inputEntry>
+        <inputEntry><text>&lt; 50</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <inputEntry><text>&lt;= 365</text></inputEntry>
+        <outputEntry><text>"P3"</text></outputEntry>
+        <outputEntry><text>"JURISDICTION_MONITOR"</text></outputEntry>
+        <outputEntry><text>48</text></outputEntry>
+      </rule>
+      <rule id="r_default_investigate">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"P2"</text></outputEntry>
+        <outputEntry><text>"ANALYST_REVIEW"</text></outputEntry>
+        <outputEntry><text>24</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

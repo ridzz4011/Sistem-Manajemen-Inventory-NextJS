@@ -1,0 +1,143 @@
+# decision: Payment Fraud Control (d_payment_fraud_control)
+version: 1
+decision_id: d_payment_fraud_control
+decision_name: Payment Fraud Control
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: payment_amount
+      type: number
+      expression: payment.amount
+      label: Payment amount
+    - name: payment_channel
+      type: string
+      expression: payment.channel
+      label: Payment channel
+    - name: payment_countryRisk
+      type: string
+      expression: payment.countryRisk
+      label: Country risk
+    - name: payment_deviceAgeDays
+      type: number
+      expression: payment.deviceAgeDays
+      label: Device age days
+    - name: payment_velocityOneHour
+      type: number
+      expression: payment.velocityOneHour
+      label: One hour velocity
+    - name: payment_threeDsAuthenticated
+      type: boolean
+      expression: payment.threeDsAuthenticated
+      label: 3DS authenticated
+  outputs:
+    - name: action
+      type: string
+    - name: authenticationStep
+      type: string
+    - name: reasonCode
+      type: string
+rules:
+  - id: r_block_sanctioned_high_risk
+    description: dmn rule r_block_sanctioned_high_risk
+    when: payment.countryRisk IN ["SANCTIONED", "PROHIBITED"]
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "BLOCK"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "JURISDICTION_PROHIBITED"
+  - id: r_high_value_no_3ds
+    description: dmn rule r_high_value_no_3ds
+    when: payment.amount >= 50000000 AND payment.channel IN ["CARD_NOT_PRESENT", "MOBILE"] AND payment.countryRisk == "HIGH" AND payment.deviceAgeDays < 30 AND payment.velocityOneHour >= 3 AND payment.threeDsAuthenticated == false
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "DECLINE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "HIGH_RISK_UNAUTHENTICATED"
+  - id: r_step_up_new_device
+    description: dmn rule r_step_up_new_device
+    when: payment.amount >= 10000000 AND payment.amount <= 49999999 AND payment.channel IN ["MOBILE", "WEB"] AND payment.countryRisk IN ["MEDIUM", "HIGH"] AND payment.deviceAgeDays < 14 AND payment.velocityOneHour >= 1 AND payment.velocityOneHour <= 4 AND payment.threeDsAuthenticated == false
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "CHALLENGE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "BIOMETRIC_AND_OTP"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "NEW_DEVICE_STEP_UP"
+  - id: r_velocity_challenge
+    description: dmn rule r_velocity_challenge
+    when: payment.amount >= 1000000 AND payment.amount <= 9999999 AND payment.countryRisk IN ["LOW", "MEDIUM"] AND payment.deviceAgeDays >= 14 AND payment.velocityOneHour >= 6
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "CHALLENGE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "OTP"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "VELOCITY_ANOMALY"
+  - id: r_trusted_low_risk_auto
+    description: dmn rule r_trusted_low_risk_auto
+    when: payment.amount <= 5000000 AND payment.channel IN ["CARD_PRESENT", "MOBILE", "WEB"] AND payment.countryRisk == "LOW" AND payment.deviceAgeDays >= 90 AND payment.velocityOneHour <= 2 AND payment.threeDsAuthenticated == true
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "TRUSTED_PAYMENT"
+  - id: r_medium_risk_authenticated
+    description: dmn rule r_medium_risk_authenticated
+    when: payment.amount >= 5000001 AND payment.amount <= 25000000 AND payment.channel IN ["MOBILE", "WEB"] AND payment.countryRisk == "MEDIUM" AND payment.deviceAgeDays >= 30 AND payment.velocityOneHour <= 5 AND payment.threeDsAuthenticated == true
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "NONE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "AUTHENTICATED_MEDIUM_RISK"
+  - id: r_cashout_manual_review
+    description: dmn rule r_cashout_manual_review
+    when: payment.amount >= 10000000 AND payment.channel IN ["WALLET_CASHOUT", "P2P_TRANSFER"] AND payment.velocityOneHour >= 4
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "REVIEW"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "RISK_OPERATIONS"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "CASHOUT_PATTERN"
+  - id: r_default_challenge
+    description: dmn rule r_default_challenge
+    when: true == true
+    then:
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.action
+        value: "CHALLENGE"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.authenticationStep
+        value: "OTP"
+      - kind: SET_FIELD
+        path: Payment_Fraud_Control.reasonCode
+        value: "DEFAULT_CONTROL"

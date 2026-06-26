@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20230324/MODEL/" id="defs_payment_fraud" name="Payment Fraud Control" namespace="https://vastar.id/examples/conversion/payment-fraud">
+  <decision id="d_payment_fraud_control" name="Payment Fraud Control">
+    <decisionTable id="dt_payment_fraud_control" hitPolicy="FIRST">
+      <input id="i_amount" label="Payment amount">
+        <inputExpression typeRef="number"><text>payment.amount</text></inputExpression>
+      </input>
+      <input id="i_channel" label="Payment channel">
+        <inputExpression typeRef="string"><text>payment.channel</text></inputExpression>
+      </input>
+      <input id="i_country_risk" label="Country risk">
+        <inputExpression typeRef="string"><text>payment.countryRisk</text></inputExpression>
+      </input>
+      <input id="i_device_age" label="Device age days">
+        <inputExpression typeRef="number"><text>payment.deviceAgeDays</text></inputExpression>
+      </input>
+      <input id="i_velocity" label="One hour velocity">
+        <inputExpression typeRef="number"><text>payment.velocityOneHour</text></inputExpression>
+      </input>
+      <input id="i_3ds" label="3DS authenticated">
+        <inputExpression typeRef="boolean"><text>payment.threeDsAuthenticated</text></inputExpression>
+      </input>
+      <output id="o_action" name="action" typeRef="string"/>
+      <output id="o_step" name="authenticationStep" typeRef="string"/>
+      <output id="o_reason" name="reasonCode" typeRef="string"/>
+      <rule id="r_block_sanctioned_high_risk">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"SANCTIONED","PROHIBITED"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"BLOCK"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"JURISDICTION_PROHIBITED"</text></outputEntry>
+      </rule>
+      <rule id="r_high_value_no_3ds">
+        <inputEntry><text>&gt;= 50000000</text></inputEntry>
+        <inputEntry><text>"CARD_NOT_PRESENT","MOBILE"</text></inputEntry>
+        <inputEntry><text>"HIGH"</text></inputEntry>
+        <inputEntry><text>&lt; 30</text></inputEntry>
+        <inputEntry><text>&gt;= 3</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"DECLINE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"HIGH_RISK_UNAUTHENTICATED"</text></outputEntry>
+      </rule>
+      <rule id="r_step_up_new_device">
+        <inputEntry><text>[10000000..49999999]</text></inputEntry>
+        <inputEntry><text>"MOBILE","WEB"</text></inputEntry>
+        <inputEntry><text>"MEDIUM","HIGH"</text></inputEntry>
+        <inputEntry><text>&lt; 14</text></inputEntry>
+        <inputEntry><text>[1..4]</text></inputEntry>
+        <inputEntry><text>false</text></inputEntry>
+        <outputEntry><text>"CHALLENGE"</text></outputEntry>
+        <outputEntry><text>"BIOMETRIC_AND_OTP"</text></outputEntry>
+        <outputEntry><text>"NEW_DEVICE_STEP_UP"</text></outputEntry>
+      </rule>
+      <rule id="r_velocity_challenge">
+        <inputEntry><text>[1000000..9999999]</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"LOW","MEDIUM"</text></inputEntry>
+        <inputEntry><text>&gt;= 14</text></inputEntry>
+        <inputEntry><text>&gt;= 6</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"CHALLENGE"</text></outputEntry>
+        <outputEntry><text>"OTP"</text></outputEntry>
+        <outputEntry><text>"VELOCITY_ANOMALY"</text></outputEntry>
+      </rule>
+      <rule id="r_trusted_low_risk_auto">
+        <inputEntry><text>&lt;= 5000000</text></inputEntry>
+        <inputEntry><text>"CARD_PRESENT","MOBILE","WEB"</text></inputEntry>
+        <inputEntry><text>"LOW"</text></inputEntry>
+        <inputEntry><text>&gt;= 90</text></inputEntry>
+        <inputEntry><text>&lt;= 2</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"TRUSTED_PAYMENT"</text></outputEntry>
+      </rule>
+      <rule id="r_medium_risk_authenticated">
+        <inputEntry><text>[5000001..25000000]</text></inputEntry>
+        <inputEntry><text>"MOBILE","WEB"</text></inputEntry>
+        <inputEntry><text>"MEDIUM"</text></inputEntry>
+        <inputEntry><text>&gt;= 30</text></inputEntry>
+        <inputEntry><text>&lt;= 5</text></inputEntry>
+        <inputEntry><text>true</text></inputEntry>
+        <outputEntry><text>"APPROVE"</text></outputEntry>
+        <outputEntry><text>"NONE"</text></outputEntry>
+        <outputEntry><text>"AUTHENTICATED_MEDIUM_RISK"</text></outputEntry>
+      </rule>
+      <rule id="r_cashout_manual_review">
+        <inputEntry><text>&gt;= 10000000</text></inputEntry>
+        <inputEntry><text>"WALLET_CASHOUT","P2P_TRANSFER"</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>&gt;= 4</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"REVIEW"</text></outputEntry>
+        <outputEntry><text>"RISK_OPERATIONS"</text></outputEntry>
+        <outputEntry><text>"CASHOUT_PATTERN"</text></outputEntry>
+      </rule>
+      <rule id="r_default_challenge">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"CHALLENGE"</text></outputEntry>
+        <outputEntry><text>"OTP"</text></outputEntry>
+        <outputEntry><text>"DEFAULT_CONTROL"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

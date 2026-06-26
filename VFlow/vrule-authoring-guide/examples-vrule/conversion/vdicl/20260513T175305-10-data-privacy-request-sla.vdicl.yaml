@@ -1,0 +1,143 @@
+# decision: Data Privacy Request SLA (d_data_privacy_request_sla)
+version: 1
+decision_id: d_data_privacy_request_sla
+decision_name: Data Privacy Request SLA
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: privacy_requestType
+      type: string
+      expression: privacy.requestType
+      label: Request type
+    - name: privacy_jurisdiction
+      type: string
+      expression: privacy.jurisdiction
+      label: Jurisdiction
+    - name: privacy_identityVerified
+      type: boolean
+      expression: privacy.identityVerified
+      label: Identity verified
+    - name: privacy_daysOpen
+      type: number
+      expression: privacy.daysOpen
+      label: Days open
+    - name: privacy_dataSensitivity
+      type: string
+      expression: privacy.dataSensitivity
+      label: Data sensitivity
+    - name: privacy_requesterType
+      type: string
+      expression: privacy.requesterType
+      label: Requester type
+  outputs:
+    - name: action
+      type: string
+    - name: slaStatus
+      type: string
+    - name: ownerQueue
+      type: string
+rules:
+  - id: r_unverified_stop_clock
+    description: dmn rule r_unverified_stop_clock
+    when: privacy.identityVerified == false
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "REQUEST_IDENTITY_PROOF"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "CLOCK_STOPPED"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "PRIVACY_OPERATIONS"
+  - id: r_gdpr_erasure_overdue
+    description: dmn rule r_gdpr_erasure_overdue
+    when: privacy.requestType IN ["ERASURE", "PORTABILITY"] AND privacy.jurisdiction IN ["EU", "UK"] AND privacy.identityVerified == true AND privacy.daysOpen >= 25 AND privacy.dataSensitivity IN ["SPECIAL_CATEGORY", "HIGH"] AND privacy.requesterType IN ["DATA_SUBJECT", "AUTHORIZED_AGENT"]
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "ESCALATE"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "AT_RISK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "DPO"
+  - id: r_ccpa_delete_agent_review
+    description: dmn rule r_ccpa_delete_agent_review
+    when: privacy.requestType IN ["DELETE", "OPT_OUT"] AND privacy.jurisdiction IN ["CA", "US"] AND privacy.identityVerified == true AND privacy.daysOpen >= 15 AND privacy.daysOpen <= 44 AND privacy.dataSensitivity IN ["HIGH", "MEDIUM"] AND privacy.requesterType == "AUTHORIZED_AGENT"
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "LEGAL_REVIEW"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "ON_TRACK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "PRIVACY_COUNSEL"
+  - id: r_access_low_risk_auto
+    description: dmn rule r_access_low_risk_auto
+    when: privacy.requestType == "ACCESS" AND privacy.jurisdiction IN ["EU", "UK", "CA", "US", "SG"] AND privacy.identityVerified == true AND privacy.daysOpen <= 10 AND privacy.dataSensitivity IN ["LOW", "MEDIUM"] AND privacy.requesterType == "DATA_SUBJECT"
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "FULFILL"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "ON_TRACK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "PRIVACY_OPERATIONS"
+  - id: r_sensitive_access_review
+    description: dmn rule r_sensitive_access_review
+    when: privacy.requestType IN ["ACCESS", "RECTIFICATION"] AND privacy.identityVerified == true AND privacy.daysOpen >= 0 AND privacy.daysOpen <= 20 AND privacy.dataSensitivity IN ["SPECIAL_CATEGORY", "HIGH"]
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "REVIEW_AND_REDACT"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "ON_TRACK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "PRIVACY_ANALYST"
+  - id: r_overdue_any_verified
+    description: dmn rule r_overdue_any_verified
+    when: privacy.identityVerified == true AND privacy.daysOpen >= 45
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "ESCALATE"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "OVERDUE"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "DPO"
+  - id: r_internal_request_route
+    description: dmn rule r_internal_request_route
+    when: privacy.requestType IN ["ACCESS", "RECTIFICATION"] AND privacy.identityVerified == true AND privacy.daysOpen <= 20 AND privacy.requesterType IN ["EMPLOYEE", "CONTRACTOR"]
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "ROUTE_TO_HR_PRIVACY"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "ON_TRACK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "HR_PRIVACY"
+  - id: r_default_privacy_ops
+    description: dmn rule r_default_privacy_ops
+    when: privacy.identityVerified == true
+    then:
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.action
+        value: "ASSESS"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.slaStatus
+        value: "ON_TRACK"
+      - kind: SET_FIELD
+        path: Data_Privacy_Request_SLA.ownerQueue
+        value: "PRIVACY_OPERATIONS"

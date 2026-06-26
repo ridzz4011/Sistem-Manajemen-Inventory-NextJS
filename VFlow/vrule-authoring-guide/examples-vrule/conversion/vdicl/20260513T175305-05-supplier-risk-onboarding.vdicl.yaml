@@ -1,0 +1,139 @@
+# decision: Supplier Risk Onboarding (d_supplier_onboarding)
+version: 1
+decision_id: d_supplier_onboarding
+decision_name: Supplier Risk Onboarding
+hit_policy: FIRST
+schema:
+  inputs:
+    - name: supplier_annualSpend
+      type: number
+      expression: supplier.annualSpend
+      label: Annual spend
+    - name: supplier_sanctionsHit
+      type: boolean
+      expression: supplier.sanctionsHit
+      label: Sanctions screening hit
+    - name: supplier_financialHealthScore
+      type: number
+      expression: supplier.financialHealthScore
+      label: Financial health score
+    - name: supplier_countryRisk
+      type: string
+      expression: supplier.countryRisk
+      label: Country risk
+    - name: supplier_certificationsComplete
+      type: boolean
+      expression: supplier.certificationsComplete
+      label: Certifications complete
+  outputs:
+    - name: onboardingDecision
+      type: string
+    - name: monitoringTier
+      type: string
+    - name: approvalOwner
+      type: string
+rules:
+  - id: r_reject_sanctions_hit
+    description: dmn rule r_reject_sanctions_hit
+    when: supplier.sanctionsHit == true
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "REJECT"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "PROHIBITED"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "COMPLIANCE"
+  - id: r_reject_critical_country_low_health
+    description: dmn rule r_reject_critical_country_low_health
+    when: supplier.sanctionsHit == false AND supplier.financialHealthScore < 45 AND supplier.countryRisk == "CRITICAL"
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "REJECT"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "PROHIBITED"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "RISK_COMMITTEE"
+  - id: r_strategic_high_risk_committee
+    description: dmn rule r_strategic_high_risk_committee
+    when: supplier.annualSpend >= 10000000000 AND supplier.sanctionsHit == false AND supplier.financialHealthScore >= 45 AND supplier.financialHealthScore <= 69 AND supplier.countryRisk IN ["HIGH", "CRITICAL"] AND supplier.certificationsComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "CONDITIONAL_APPROVE"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "ENHANCED"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "PROCUREMENT_RISK_COMMITTEE"
+  - id: r_missing_certifications
+    description: dmn rule r_missing_certifications
+    when: supplier.annualSpend >= 1000000000 AND supplier.sanctionsHit == false AND supplier.financialHealthScore >= 60 AND supplier.countryRisk IN ["LOW", "MEDIUM"] AND supplier.certificationsComplete == false
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "PENDING"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "STANDARD"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "PROCUREMENT_MANAGER"
+  - id: r_high_spend_strong_supplier
+    description: dmn rule r_high_spend_strong_supplier
+    when: supplier.annualSpend >= 5000000000 AND supplier.sanctionsHit == false AND supplier.financialHealthScore >= 80 AND supplier.countryRisk IN ["LOW", "MEDIUM"] AND supplier.certificationsComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "STANDARD"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "PROCUREMENT_DIRECTOR"
+  - id: r_small_low_risk_auto
+    description: dmn rule r_small_low_risk_auto
+    when: supplier.annualSpend <= 500000000 AND supplier.sanctionsHit == false AND supplier.financialHealthScore >= 70 AND supplier.countryRisk == "LOW" AND supplier.certificationsComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "LIGHT"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "AUTO"
+  - id: r_medium_risk_standard
+    description: dmn rule r_medium_risk_standard
+    when: supplier.annualSpend >= 500000001 AND supplier.annualSpend <= 4999999999 AND supplier.sanctionsHit == false AND supplier.financialHealthScore >= 60 AND supplier.financialHealthScore <= 79 AND supplier.countryRisk == "MEDIUM" AND supplier.certificationsComplete == true
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "APPROVE"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "STANDARD"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "PROCUREMENT_MANAGER"
+  - id: r_default_due_diligence
+    description: dmn rule r_default_due_diligence
+    when: supplier.sanctionsHit == false
+    then:
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.onboardingDecision
+        value: "DUE_DILIGENCE"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.monitoringTier
+        value: "ENHANCED"
+      - kind: SET_FIELD
+        path: Supplier_Risk_Onboarding.approvalOwner
+        value: "SUPPLIER_RISK"
