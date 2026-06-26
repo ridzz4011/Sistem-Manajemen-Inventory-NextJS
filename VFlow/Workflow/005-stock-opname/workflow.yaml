@@ -1,12 +1,12 @@
 version: "3.0"
 
 metadata:
-id: kelompok2-stock-opname-workflow
-name: "Inventory Stock Opname Workflow"
-description: |
-  Workflow stock opname dengan perhitungan selisih stok,
-  klasifikasi otomatis menggunakan VRule,
-  approval Kepala Gudang dan Direktur.
+  id: kelompok2-stock-opname-workflow
+  name: "Inventory Stock Opname Workflow"
+  description: |
+    Workflow stock opname dengan perhitungan selisih stok,
+    klasifikasi otomatis menggunakan VRule,
+    approval Kepala Gudang dan Direktur.
 
 spec:
   activities:
@@ -18,7 +18,7 @@ spec:
         trigger_type: webhook
 
         webhook_config:
-          path: /inventory/stock-opname
+          path: /webhook/kelompok2/inventory/stock-opname
           method: POST
 
         response_framing: length_prefixed

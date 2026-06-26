@@ -14,7 +14,7 @@ spec:
       trigger_config:
         trigger_type: webhook
         webhook_config:
-          path: /inventory/stock-out
+          path: /webhook/kelompok2/inventory/stock-out
           method: POST
         response_framing: length_prefixed
         end_activity: respond

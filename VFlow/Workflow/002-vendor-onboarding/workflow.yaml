@@ -1,7 +1,7 @@
 version: "3.0"
 
 metadata:
-  id: vendor-onboarding
+  id: kelompok2-vendor-onboarding
   name: "Vendor Onboarding Workflow"
   description: |
     Workflow onboarding vendor baru dengan validasi
@@ -16,7 +16,7 @@ spec:
         trigger_type: webhook
 
         webhook_config:
-          path: /inventory/vendor/register
+          path: /webhook/kelompok2/inventory/vendor/register
           method: POST
 
         response_framing: length_prefixed

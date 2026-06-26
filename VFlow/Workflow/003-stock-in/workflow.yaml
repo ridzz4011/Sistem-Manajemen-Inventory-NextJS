@@ -1,11 +1,11 @@
 version: "3.0"
 
 metadata:
-id: kelompok2-stock-in-workflow
-name: "Inventory Stock In Workflow"
-description: |
-  Workflow penerimaan barang dengan validasi quantity,
-  dispute handling, approval, dan update inventory.
+  id: kelompok2-stock-in-workflow
+  name: "Inventory Stock In Workflow"
+  description: |
+    Workflow penerimaan barang dengan validasi quantity,
+    dispute handling, approval, dan update inventory.
 
 spec:
   activities:
@@ -17,7 +17,7 @@ spec:
         trigger_type: webhook
 
         webhook_config:
-          path: /inventory/stock-in
+          path: /webhook/kelompok2/inventory/stock-in
           method: POST
 
         response_framing: length_prefixed
