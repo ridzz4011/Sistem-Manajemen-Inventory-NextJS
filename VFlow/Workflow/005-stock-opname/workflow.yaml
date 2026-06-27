@@ -113,18 +113,16 @@ spec:
       output_variable: investigation_result
 
     - id: update_inventory
-      activity_type: Connector
+      activity_type: Http
 
-      connector_config:
-        connector_ref: vastar.http
-        operation: post
+      http_config:
+        method: POST
+        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-opname/approve"
+        headers:
+          "Content-Type": "application/json"
+          "Authorization": 'Bearer ${API_SECRET_KEY}'
 
       input_mappings:
-        - target: url
-          source:
-            language: literal
-            source: "http://host.docker.internal:3000/api/stock-opname/approve"
-
         - target: body
           source:
             language: v-cel

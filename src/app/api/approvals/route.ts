@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
-import { ApprovalStatus, ApprovalType } from "@/generated/prisma/enums";
+import { ApprovalStatus, ApprovalType } from "@/generated/prisma/client";
 
 export async function GET(req: Request) {
   try {
@@ -38,32 +38,58 @@ export async function POST(req: Request) {
     // 2. Trigger VFlow API
     // Kita petakan tipe request dengan endpoint webhook/trigger VFlow yang sesuai
     let vflowEndpoint = "";
-    if (type === "NEW_ITEM") vflowEndpoint = "/api/v1/workflow/001-item-approval/trigger";
-    else if (type === "NEW_VENDOR") vflowEndpoint = "/api/v1/workflow/002-vendor-onboarding/trigger";
+    let vflowPayload = {};
+
+    switch (type) {
+      case "NEW_ITEM":
+        vflowEndpoint = `${process.env.VFLOW_BASE_URL}/webhook/kelompok2/inventory/item/create`;
+        vflowPayload = { 
+          item_name: payload.name, 
+          item_sku: payload.sku, 
+          item_price: payload.price,
+          item_uom: payload.uom 
+        };
+        break;
+      case "NEW_VENDOR":
+        vflowEndpoint = `${process.env.VFLOW_BASE_URL}/webhook/kelompok2/inventory/vendor/register`;
+        vflowPayload = { 
+          vendor_name: payload.name, 
+          vendor_contact: payload.contact,
+          vendor_status: "NEW" // Sesuai schema vrule vendor
+        };
+        break;
+      case "STOCK_IN":
+        vflowEndpoint = `${process.env.VFLOW_BASE_URL}/webhook/kelompok2/inventory/stock-in`;
+        vflowPayload = { 
+          transactionId: approvalRequest.id,
+          expected_qty: payload.expectedQty,
+          received_qty: payload.receivedQty 
+        };
+        break;
+      case "STOCK_OUT":
+        vflowEndpoint = `${process.env.VFLOW_BASE_URL}/webhook/kelompok2/inventory/stock-out`;
+        vflowPayload = {
+          transactionId: approvalRequest.id,
+          current_stock: payload.currentStock,
+          requested_qty: payload.requestedQty
+        };
+        break;
+      case "STOCK_OPNAME":
+        vflowEndpoint = `${process.env.VFLOW_BASE_URL}/webhook/kelompok2/inventory/stock-opname`;
+        vflowPayload = {
+          system_stock: payload.systemStock,
+          physical_stock: payload.physicalStock
+        };
+        break;
+    }
 
     if (vflowEndpoint) {
-      const vflowUrl = `${process.env.VFLOW_API_URL || "http://localhost:8080"}${vflowEndpoint}`;
-      
-      try {
-        await fetch(vflowUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.VFLOW_API_KEY}`,
-          },
-          body: JSON.stringify({
-            // Payload yang dikirim ke VFlow Engine
-            requestId: approvalRequest.id,
-            type: approvalRequest.type,
-            requestedBy: approvalRequest.requestedBy,
-            data: payload,
-          }),
-        });
-        console.log(`[VFlow] Berhasil men-trigger workflow untuk request: ${approvalRequest.id}`);
-      } catch (vflowError) {
-        // Catat error VFlow tapi jangan gagalkan request pembuatan di DB kita
-        console.error(`[VFlow] Gagal men-trigger workflow:`, vflowError);
-      }
+      const vflowUrl = `${process.env.VFLOW_BASE_URL}${vflowEndpoint}`;
+      await fetch(vflowUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(vflowPayload),
+      });
     }
 
     return NextResponse.json(

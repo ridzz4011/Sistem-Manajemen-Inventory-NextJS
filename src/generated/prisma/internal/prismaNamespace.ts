@@ -1408,6 +1408,7 @@ export const ApprovalRequestScalarFieldEnum = {
   status: 'status',
   payload: 'payload',
   notes: 'notes',
+  taskId: 'taskId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

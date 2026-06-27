@@ -50,11 +50,13 @@ enum ApprovalStatus {
 enum ApprovalType {
   NEW_ITEM
   NEW_VENDOR
-  STOCK_ADJUSTMENT
+  STOCK_IN
+  STOCK_OUT
+  STOCK_OPNAME
 }
 
 model Role {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   name        RoleType @unique
   description String?
 
@@ -65,11 +67,11 @@ model Role {
 }
 
 model Item {
-  id          String @id @default(cuid())
-  sku         String @unique
+  id          String  @id @default(cuid())
+  sku         String  @unique
   name        String
   description String?
-  basePrice   Decimal @db.Decimal(18,2)
+  basePrice   Decimal @db.Decimal(18, 2)
   uom         String
 
   metadata Json?
@@ -98,9 +100,9 @@ model Partner {
 }
 
 model Warehouse {
-  id      String @id @default(cuid())
+  id      String  @id @default(cuid())
   name    String
-  code    String @unique
+  code    String  @unique
   address String?
 
   locations Location[]
@@ -110,8 +112,8 @@ model Warehouse {
 }
 
 model Location {
-  id          String @id @default(cuid())
-  name        String
+  id   String @id @default(cuid())
+  name String
 
   warehouseId String
   warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
@@ -129,7 +131,7 @@ model InventoryBalance {
   id String @id @default(cuid())
 
   itemId String
-  item   Item @relation(fields: [itemId], references: [id])
+  item   Item   @relation(fields: [itemId], references: [id])
 
   locationId String
   location   Location @relation(fields: [locationId], references: [id])
@@ -171,7 +173,7 @@ model TransactionDetail {
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
   itemId String
-  item   Item @relation(fields: [itemId], references: [id])
+  item   Item   @relation(fields: [itemId], references: [id])
 
   locationId String
   location   Location @relation(fields: [locationId], references: [id])
@@ -190,7 +192,7 @@ model WorkflowTask {
   transaction   Transaction @relation(fields: [transactionId], references: [id])
 
   roleId String
-  role   Role @relation(fields: [roleId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
 
   taskName String
 
@@ -226,15 +228,13 @@ model AuditLog {
 
 model ApprovalRequest {
   id          String         @id @default(cuid())
-  type        ApprovalType   // Jenis request (Barang Baru, Vendor Baru, dll)
-  requestedBy String         // Bisa diubah menjadi relasi ke model User jika ada (misal: @relation(fields: [userId], references: [id]))
+  type        ApprovalType // Jenis request (Barang Baru, Vendor Baru, dll)
+  requestedBy String // Bisa diubah menjadi relasi ke model User jika ada (misal: @relation(fields: [userId], references: [id]))
   status      ApprovalStatus @default(PENDING)
-  payload     Json           // Menyimpan data form mentah yang belum disetujui
-  notes       String?        // Catatan opsional (misal: alasan penolakan)
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  payload     Json // Menyimpan data form mentah yang belum disetujui
+  notes       String? // Catatan opsional (misal: alasan penolakan)
+  taskId      String?
 
-  @@index([status]) // Indexing untuk mempercepat pencarian data PENDING
-  @@index([type])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

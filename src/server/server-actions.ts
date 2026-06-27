@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { prisma } from "@/server/db/prisma";
 import { revalidatePath } from "next/cache";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL
+
 export async function getValueFromCookie(key: string): Promise<string | undefined> {
   const cookieStore = await cookies();
   return cookieStore.get(key)?.value;
@@ -28,52 +30,123 @@ export async function getPreference<T extends string>(key: string, allowed: read
   return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
-export async function createItemAction(data: any) {
+// export async function createItemAction(data: any) {
+//   try {
+//     // 1. Cek duplikasi SKU di database lokal (Prisma) terlebih dahulu!
+//     const existingItem = await prisma.item.findUnique({
+//       where: { sku: data.item_sku, name: data.item_name }, // Pastikan ini sesuai dengan key dari frontend Anda
+//     });
+
+//     // Kembalikan error khusus jika SKU duplikat
+//     if (existingItem?.sku) {
+//       if (existingItem?.name) {
+//         return {
+//           success: false,
+//           errorType: "DUPLICATE_NAME",
+//           message:"Nama ini sudah terdaftar di sistem."
+//         };
+//       }
+//       return { 
+//         success: false, 
+//         errorType: "DUPLICATE_SKU", 
+//         message: "SKU ini sudah terdaftar di sistem." 
+//       };
+//     }
+
+//     const vflowServer = process.env.VFLOW_BASE_URL;
+//     if (!vflowServer) throw new Error("VFlow URL belum dikonfigurasi");
+
+//     // 2. Tembak Webhook VFlow
+//     const response = await fetch(`${vflowServer}/webhook/kelompok2/inventory/item/create`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(data),
+//     });
+
+//     if (!response.ok) throw new Error("Gagal mengirim ke VFlow");
+
+//     // 3. Refresh state halaman di latar belakang
+//     revalidatePath('/dashboard/products'); 
+
+//     // 4. Kembalikan respons sukses khusus
+//     return { 
+//       success: true, 
+//       message: "Barang berhasil dikirim. Menunggu persetujuan Manajer!" 
+//     };
+
+//   } catch (error) {
+//     console.error(error);
+//     return { success: false, message: "Terjadi kesalahan sistem." };
+//   }
+// }
+
+export async function submitApprovalRequestAction(type: string, payload: any, userName: string) {
   try {
-    // 1. Cek duplikasi SKU di database lokal (Prisma) terlebih dahulu!
-    const existingItem = await prisma.item.findUnique({
-      where: { sku: data.item_sku, name: data.item_name }, // Pastikan ini sesuai dengan key dari frontend Anda
-    });
-
-    // Kembalikan error khusus jika SKU duplikat
-    if (existingItem?.sku) {
-      if (existingItem?.name) {
-        return {
-          success: false,
-          errorType: "DUPLICATE_NAME",
-          message:"Nama ini sudah terdaftar di sistem."
-        };
-      }
-      return { 
-        success: false, 
-        errorType: "DUPLICATE_SKU", 
-        message: "SKU ini sudah terdaftar di sistem." 
-      };
-    }
-
-    const vflowServer = process.env.VFLOW_BASE_URL;
-    if (!vflowServer) throw new Error("VFlow URL belum dikonfigurasi");
-
-    // 2. Tembak Webhook VFlow
-    const response = await fetch(`${vflowServer}/webhook/kelompok2/inventory/item/create`, {
+    const response = await fetch(`${APP_URL}/api/approvals`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        type: type, // "NEW_ITEM", "NEW_VENDOR", dll.
+        requestedBy: userName,
+        payload: payload,
+      }),
     });
 
-    if (!response.ok) throw new Error("Gagal mengirim ke VFlow");
-
-    // 3. Refresh state halaman di latar belakang
-    revalidatePath('/dashboard/products'); 
-
-    // 4. Kembalikan respons sukses khusus
-    return { 
-      success: true, 
-      message: "Barang berhasil dikirim. Menunggu persetujuan Manajer!" 
-    };
-
+    const result = await response.json();
+    
+    if (result.success) {
+      // Refresh tabel approvals agar antrean baru langsung muncul
+      revalidatePath("/dashboard/approvals");
+    }
+    
+    return result;
   } catch (error) {
-    console.error(error);
-    return { success: false, message: "Terjadi kesalahan sistem." };
+    console.error("Action error:", error);
+    return { success: false, message: "Gagal mengirim request ke server." };
+  }
+}
+
+export async function approveRequestAction(requestId: string) {
+  try {
+    const response = await fetch(`${APP_URL}/api/approvals/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId }),
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      // HANYA refresh halaman approvals agar status berubah menjadi APPROVED.
+      // Kita tidak me-refresh /dashboard/products di sini karena VFlow 
+      // yang akan mengisinya di latar belakang.
+      revalidatePath("/dashboard/approvals");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Approve Action error:", error);
+    return { success: false, message: "Terjadi kesalahan sistem saat memproses persetujuan." };
+  }
+}
+
+export async function rejectRequestAction(requestId: string, notes: string = "Ditolak oleh Manajer") {
+  try {
+    const response = await fetch(`${APP_URL}/api/approvals/reject`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, notes }),
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      revalidatePath("/dashboard/approvals");
+    }
+    
+    return result;
+  } catch (error) {
+    console.error("Reject Action error:", error);
+    return { success: false, message: "Terjadi kesalahan sistem saat menolak request." };
   }
 }

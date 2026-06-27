@@ -54,7 +54,7 @@ spec:
       http_config:
         method: POST
         # GANTI URL INI dengan URL Ngrok atau Vercel Anda
-        url: "https://iphone-brutishly-subplot.ngrok-free.dev"
+        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/items/create"
         headers:
           # Token harus sama dengan yang ada di file .env Next.js Anda
           "Authorization": 'Bearer ${API_SECRET_KEY}'
@@ -106,14 +106,14 @@ spec:
         id: f3,
         from: { node: item_decision },
         to: { node: approval_task },
-        condition: 'rule_result.outputs.decision == "REVIEW"',
+        condition: 'rule_result.decision == "REVIEW"',
         priority: 10,
       }
     - {
         id: f4,
         from: { node: item_decision },
         to: { node: call_nextjs_api },
-        condition: 'rule_result.outputs.decision == "APPROVE"',
+        condition: 'rule_result.decision == "APPROVE"',
         priority: 20,
       }
 

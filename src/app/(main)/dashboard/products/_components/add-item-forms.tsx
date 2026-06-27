@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createItemAction } from "@/server/server-actions";
+import { submitApprovalRequestAction } from "@/server/server-actions";
 import { toast } from "sonner";
 
 interface AddItemFormProps {
@@ -30,7 +30,7 @@ export function AddItemForm({ onSuccess }: AddItemFormProps) {
     };
 
     // Panggil Server Action
-    const result = await createItemAction(data);
+    const result = await submitApprovalRequestAction("NEW_ITEM", data, "current_user");
 
     if (!result.success) {
       if (result.errorType === "DUPLICATE_SKU") {

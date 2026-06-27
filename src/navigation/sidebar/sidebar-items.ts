@@ -6,6 +6,7 @@ import {
   Fingerprint,
   Forklift,
   Gauge,
+  Check,
   GraduationCap,
   Kanban,
   LayoutDashboard,
@@ -100,6 +101,12 @@ export const sidebarItems: NavGroup[] = [
         title: "Products",
         url: "/dashboard/products",
         icon: Boxes,
+      },
+      {
+        id: "approvals",
+        title: "Approvals",
+        url: "/dashboard/approvals",
+        icon: Check,
       },
       {
         id: "suppliers",

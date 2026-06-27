@@ -30,6 +30,7 @@ export type ApprovalRequestMinAggregateOutputType = {
   requestedBy: string | null
   status: $Enums.ApprovalStatus | null
   notes: string | null
+  taskId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -40,6 +41,7 @@ export type ApprovalRequestMaxAggregateOutputType = {
   requestedBy: string | null
   status: $Enums.ApprovalStatus | null
   notes: string | null
+  taskId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -51,6 +53,7 @@ export type ApprovalRequestCountAggregateOutputType = {
   status: number
   payload: number
   notes: number
+  taskId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -63,6 +66,7 @@ export type ApprovalRequestMinAggregateInputType = {
   requestedBy?: true
   status?: true
   notes?: true
+  taskId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -73,6 +77,7 @@ export type ApprovalRequestMaxAggregateInputType = {
   requestedBy?: true
   status?: true
   notes?: true
+  taskId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -84,6 +89,7 @@ export type ApprovalRequestCountAggregateInputType = {
   status?: true
   payload?: true
   notes?: true
+  taskId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -168,6 +174,7 @@ export type ApprovalRequestGroupByOutputType = {
   status: $Enums.ApprovalStatus
   payload: runtime.JsonValue
   notes: string | null
+  taskId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ApprovalRequestCountAggregateOutputType | null
@@ -200,6 +207,7 @@ export type ApprovalRequestWhereInput = {
   status?: Prisma.EnumApprovalStatusFilter<"ApprovalRequest"> | $Enums.ApprovalStatus
   payload?: Prisma.JsonFilter<"ApprovalRequest">
   notes?: Prisma.StringNullableFilter<"ApprovalRequest"> | string | null
+  taskId?: Prisma.StringNullableFilter<"ApprovalRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ApprovalRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ApprovalRequest"> | Date | string
 }
@@ -211,6 +219,7 @@ export type ApprovalRequestOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   payload?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  taskId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -225,6 +234,7 @@ export type ApprovalRequestWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumApprovalStatusFilter<"ApprovalRequest"> | $Enums.ApprovalStatus
   payload?: Prisma.JsonFilter<"ApprovalRequest">
   notes?: Prisma.StringNullableFilter<"ApprovalRequest"> | string | null
+  taskId?: Prisma.StringNullableFilter<"ApprovalRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ApprovalRequest"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ApprovalRequest"> | Date | string
 }, "id">
@@ -236,6 +246,7 @@ export type ApprovalRequestOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   payload?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  taskId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ApprovalRequestCountOrderByAggregateInput
@@ -253,6 +264,7 @@ export type ApprovalRequestScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumApprovalStatusWithAggregatesFilter<"ApprovalRequest"> | $Enums.ApprovalStatus
   payload?: Prisma.JsonWithAggregatesFilter<"ApprovalRequest">
   notes?: Prisma.StringNullableWithAggregatesFilter<"ApprovalRequest"> | string | null
+  taskId?: Prisma.StringNullableWithAggregatesFilter<"ApprovalRequest"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ApprovalRequest"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ApprovalRequest"> | Date | string
 }
@@ -264,6 +276,7 @@ export type ApprovalRequestCreateInput = {
   status?: $Enums.ApprovalStatus
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  taskId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -275,6 +288,7 @@ export type ApprovalRequestUncheckedCreateInput = {
   status?: $Enums.ApprovalStatus
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  taskId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -286,6 +300,7 @@ export type ApprovalRequestUpdateInput = {
   status?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -297,6 +312,7 @@ export type ApprovalRequestUncheckedUpdateInput = {
   status?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -308,6 +324,7 @@ export type ApprovalRequestCreateManyInput = {
   status?: $Enums.ApprovalStatus
   payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: string | null
+  taskId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -319,6 +336,7 @@ export type ApprovalRequestUpdateManyMutationInput = {
   status?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -330,6 +348,7 @@ export type ApprovalRequestUncheckedUpdateManyInput = {
   status?: Prisma.EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
   payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -341,6 +360,7 @@ export type ApprovalRequestCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   payload?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -351,6 +371,7 @@ export type ApprovalRequestMaxOrderByAggregateInput = {
   requestedBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -361,6 +382,7 @@ export type ApprovalRequestMinOrderByAggregateInput = {
   requestedBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -382,6 +404,7 @@ export type ApprovalRequestSelect<ExtArgs extends runtime.Types.Extensions.Inter
   status?: boolean
   payload?: boolean
   notes?: boolean
+  taskId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["approvalRequest"]>
@@ -393,6 +416,7 @@ export type ApprovalRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   payload?: boolean
   notes?: boolean
+  taskId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["approvalRequest"]>
@@ -404,6 +428,7 @@ export type ApprovalRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   payload?: boolean
   notes?: boolean
+  taskId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["approvalRequest"]>
@@ -415,11 +440,12 @@ export type ApprovalRequestSelectScalar = {
   status?: boolean
   payload?: boolean
   notes?: boolean
+  taskId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ApprovalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "requestedBy" | "status" | "payload" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["approvalRequest"]>
+export type ApprovalRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "type" | "requestedBy" | "status" | "payload" | "notes" | "taskId" | "createdAt" | "updatedAt", ExtArgs["result"]["approvalRequest"]>
 
 export type $ApprovalRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ApprovalRequest"
@@ -431,6 +457,7 @@ export type $ApprovalRequestPayload<ExtArgs extends runtime.Types.Extensions.Int
     status: $Enums.ApprovalStatus
     payload: runtime.JsonValue
     notes: string | null
+    taskId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["approvalRequest"]>
@@ -862,6 +889,7 @@ export interface ApprovalRequestFieldRefs {
   readonly status: Prisma.FieldRef<"ApprovalRequest", 'ApprovalStatus'>
   readonly payload: Prisma.FieldRef<"ApprovalRequest", 'Json'>
   readonly notes: Prisma.FieldRef<"ApprovalRequest", 'String'>
+  readonly taskId: Prisma.FieldRef<"ApprovalRequest", 'String'>
   readonly createdAt: Prisma.FieldRef<"ApprovalRequest", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ApprovalRequest", 'DateTime'>
 }

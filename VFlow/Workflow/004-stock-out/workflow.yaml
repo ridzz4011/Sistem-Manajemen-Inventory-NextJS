@@ -67,18 +67,16 @@ spec:
       output_variable: approval_result
 
     - id: execute_stock_out
-      activity_type: Connector
+      activity_type: Http
 
-      connector_config:
-        connector_ref: vastar.http
-        operation: post
+      http_config:
+        method: POST
+        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-out/approve"
+        headers:
+          "Content-Type": "application/json"
+          "Authorization": 'Bearer ${API_SECRET_KEY}'
 
       input_mappings:
-        - target: url
-          source:
-            language: literal
-            source: "http://host.docker.internal:3000/api/stock-out/approve"
-
         - target: body
           source:
             language: v-cel

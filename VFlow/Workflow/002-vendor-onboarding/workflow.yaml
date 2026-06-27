@@ -66,6 +66,25 @@ spec:
 
       output_variable: approval_result
 
+    - id: call_nextjs_vendor_api
+      activity_type: Http
+      http_config:
+        method: POST
+        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/suppliers" # Sesuaikan path API Vendor Anda
+        headers:
+          "Authorization": 'Bearer ${API_SECRET_KEY}'
+          "Content-Type": "application/json"
+      input_mappings:
+        - target: body
+          source:
+            language: v-cel
+            source: >
+              {
+                "name": trigger_payload.body.vendor_name,
+                "contactInfo": trigger_payload.body.vendor_contact
+              }
+      output_variable: api_result
+
     - id: approved_response
       activity_type: Transform
 
@@ -132,19 +151,9 @@ spec:
         priority: 20,
       }
 
-    - { id: f5, from: { node: approval_task }, to: { node: approved_response } }
-
-    - {
-        id: f6,
-        from: { node: approved_response },
-        to: { node: respond-approved },
-      }
-
-    - {
-        id: f7,
-        from: { node: rejected_response },
-        to: { node: respond-rejected },
-      }
+    - { id: f5, from: { node: approval_task }, to: { node: call_nextjs_vendor_api } }
+    - { id: f6, from: { node: call_nextjs_vendor_api }, to: { node: approved_response } }
+    - { id: f7, from: { node: approved_response }, to: { node: respond-approved } }
 
     - { id: f8, from: { node: respond-approved }, to: { node: end } }
 

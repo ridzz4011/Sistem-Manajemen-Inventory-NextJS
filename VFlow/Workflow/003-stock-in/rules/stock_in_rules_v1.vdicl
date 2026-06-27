@@ -1,33 +1,29 @@
+decision_id: kelompok2_stock_in_rules_v1
+decision_name: Kelompok 2 Stock-In Rules
+version: 1
+hit_policy: PRIORITY
+output_conflict_policy: STRICT
+
 schema_ref:
   path: "../schemas/stock_in_fact_v1.yaml"
   namespace: "inventory.stockin"
   entity: "stock_in_fact"
   version: 1
 
-hit_policy: PRIORITY
-
 rules:
-
   - id: "STOCK_IN_DISPUTE"
     priority: 10
     enabled: true
-
     description: "Jumlah diterima tidak sesuai"
-
     when: "received_qty != expected_qty"
-
     then:
       - kind: SET_DECISION
         decision: DISPUTE
-
   - id: "STOCK_IN_NORMAL"
     priority: 100
     enabled: true
-
     description: "Jumlah sesuai"
-
     when: "received_qty == expected_qty"
-
     then:
       - kind: SET_DECISION
         decision: APPROVE

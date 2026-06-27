@@ -70,7 +70,9 @@ export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus
 export const ApprovalType = {
   NEW_ITEM: 'NEW_ITEM',
   NEW_VENDOR: 'NEW_VENDOR',
-  STOCK_ADJUSTMENT: 'STOCK_ADJUSTMENT'
+  STOCK_IN: 'STOCK_IN',
+  STOCK_OUT: 'STOCK_OUT',
+  STOCK_OPNAME: 'STOCK_OPNAME'
 } as const
 
 export type ApprovalType = (typeof ApprovalType)[keyof typeof ApprovalType]

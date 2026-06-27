@@ -1,33 +1,29 @@
+decision_id: kelompok2_vendor_rules_v1
+decision_name: Kelompok 2 Vendor Rules
+version: 1
+hit_policy: PRIORITY
+output_conflict_policy: STRICT
+
 schema_ref:
   path: "../schemas/vendor_fact_v1.yaml"
   namespace: "inventory.vendor"
   entity: "vendor_fact"
   version: 1
 
-hit_policy: PRIORITY
-
 rules:
-
   - id: "BLACKLIST_VENDOR"
     priority: 10
     enabled: true
-
     description: "Vendor masuk blacklist"
-
     when: "vendor_status == 'BLACKLISTED'"
-
     then:
       - kind: SET_DECISION
         decision: REJECT
-
   - id: "VALID_VENDOR"
     priority: 100
     enabled: true
-
     description: "Vendor valid"
-
     when: "vendor_status != 'BLACKLISTED'"
-
     then:
       - kind: SET_DECISION
         decision: REVIEW
