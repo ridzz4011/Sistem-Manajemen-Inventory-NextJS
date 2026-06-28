@@ -109,10 +109,16 @@ export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof Item
 export const PartnerScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  contactPerson: 'contactPerson',
   type: 'type',
+  status: 'status',
   email: 'email',
   phone: 'phone',
   address: 'address',
+  category: 'category',
+  products: 'products',
+  rating: 'rating',
+  joinedDate: 'joinedDate',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

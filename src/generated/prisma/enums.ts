@@ -76,3 +76,13 @@ export const ApprovalType = {
 } as const
 
 export type ApprovalType = (typeof ApprovalType)[keyof typeof ApprovalType]
+
+
+export const PartnerStatus = {
+  Active: 'Active',
+  Inactive: 'Inactive',
+  Pending: 'Pending',
+  Suspended: 'Suspended'
+} as const
+
+export type PartnerStatus = (typeof PartnerStatus)[keyof typeof PartnerStatus]

@@ -17,8 +17,9 @@ rules:
     description: "Selisih stok besar"
     when: "stock_difference > 10"
     then:
-      - kind: SET_DECISION
-        decision: INVESTIGATE
+      - kind: SET_FIELD
+        path: decision
+        value: "PENDING"
 
   - id: "OPNAME_NORMAL"
     priority: 100
@@ -26,5 +27,6 @@ rules:
     description: "Selisih stok wajar"
     when: "stock_difference <= 10"
     then:
-      - kind: SET_DECISION
-        decision: APPROVE
+      - kind: SET_FIELD
+        path: decision
+        value: "APPROVED"

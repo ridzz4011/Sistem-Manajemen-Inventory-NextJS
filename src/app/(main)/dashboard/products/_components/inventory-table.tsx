@@ -102,7 +102,7 @@ export function InventoryTable({ data }: InventoryTableProps) {
               <DialogHeader>
                 <DialogTitle>Tambah Barang Baru</DialogTitle>
               </DialogHeader>
-              <AddItemForm />
+              <AddItemForm onSuccess={() => setIsAddDialogOpen(false)} />
             </DialogContent>
           </Dialog>
           <Button aria-label="Export data" size="icon-sm" variant="outline">

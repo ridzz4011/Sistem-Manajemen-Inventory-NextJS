@@ -75,7 +75,7 @@ export function SuppliersTable({ table }: { table: TableType<SupplierRow> }) {
             ) : (
               <TableRow>
                 <TableCell colSpan={table.getVisibleLeafColumns().length} className="h-24 text-center">
-                  No results.
+                  Tidak ada data vendor ditemukan.
                 </TableCell>
               </TableRow>
             )}
@@ -88,7 +88,7 @@ export function SuppliersTable({ table }: { table: TableType<SupplierRow> }) {
       <div className="flex items-center justify-between px-4">
         <div className="flex items-center gap-4 text-muted-foreground text-sm">
           <div className="flex items-center gap-2">
-            <span>Rows per page</span>
+            <span>Baris per halaman</span>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => table.setPageSize(Number(value))}

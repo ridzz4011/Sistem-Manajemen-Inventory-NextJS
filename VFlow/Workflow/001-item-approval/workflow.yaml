@@ -1,6 +1,6 @@
 version: "3.0"
 metadata:
-  id: kelompok2-item-approval
+  id: kelompok2-item-approval-v15
   name: "Item Approval Workflow"
   description: Workflow persetujuan barang yang menulis langsung ke DB setelah disetujui.
   dialect: vflow
@@ -11,26 +11,33 @@ spec:
       activity_type: Trigger
       trigger_config:
         trigger_type: webhook
-        webhook_config: { path: /webhook/kelompok2/inventory/item/create, method: POST }
-        # Kita ubah menjadi fire_and_forget karena VFlow yang akan nulis ke DB,
-        # Next.js tidak perlu menunggu balasan statusnya berlama-lama.
-        response_mode: fire_and_forget
+        webhook_config:
+          { path: /webhook/kelompok2/inventory/item/create-v15, method: POST }
+        response_mode: buffered
         end_activity: respond
       output_variable: trigger_payload
+
+    - id: prepare_api_payload
+      activity_type: Transform
+      input_mappings:
+        - target: payload
+          source:
+            language: v-cel
+            source: '{"requestId": trigger_body.requestId, "sku": trigger_body.item_sku, "name": trigger_body.item_name, "description": "Barang disetujui melalui Workflow VFlow", "basePrice": trigger_body.item_price, "uom": trigger_body.item_uom}'
+      output_variable: prepared_payload
 
     - id: evaluate_item
       activity_type: VRule
       rule_config:
-        rule_set_id: item_rules_v1
+        rule_set_id: kelompok2_item_approval_rules_v1
       input_mappings:
         - target: item_price
           source:
-            language: v-cel
-            source: "trigger_payload.body.item_price"
+            { language: spv1, source: "$.trigger_payload.body.item_price" }
       output_variable: rule_result
 
     - id: item_decision
-      activity_type: ExclusiveGateway
+      activity_type: Exclusive
 
     - id: approval_task
       activity_type: HumanTask
@@ -50,27 +57,25 @@ spec:
 
     # Menghubungkan DB ke API VFlow
     - id: call_nextjs_api
-      activity_type: Http # (Atau RestCall, sesuaikan dengan dialect engine pembimbing jika berbeda)
-      http_config:
-        method: POST
-        # GANTI URL INI dengan URL Ngrok atau Vercel Anda
-        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/items/create"
-        headers:
-          # Token harus sama dengan yang ada di file .env Next.js Anda
-          "Authorization": 'Bearer ${API_SECRET_KEY}'
-          "Content-Type": "application/json"
+      activity_type: Connector
+      connector_config:
+        connector_ref: vastar.http
+        operation: post
+        config:
+          bearer_token: "KELOMPOK-2-JAYA-JAYA-JAYA"
       input_mappings:
-        - target: body
+        - target: url
           source:
-            language: v-cel
-            source: >
-              {
-                "sku": trigger_payload.body.item_sku,
-                "name": trigger_payload.body.item_name,
-                "description": "Barang disetujui melalui Workflow VFlow",
-                "basePrice": trigger_payload.body.item_price,
-                "uom": trigger_payload.body.item_uom
-              }
+            {
+              language: literal,
+              source: "https://iphone-brutishly-subplot.ngrok-free.dev/api/items/create",
+            }
+        - target: headers
+          source:
+            language: literal
+            source: '{"Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA", "Content-Type": "application/json", "ngrok-skip-browser-warning": "true"}'
+        - target: body
+          source: { language: spv1, source: "$.prepared_payload" }
       output_variable: api_result
 
     - id: build_response
@@ -98,28 +103,33 @@ spec:
       activity_type: End
 
   flows:
-    - { id: f1, from: { node: trigger }, to: { node: evaluate_item } }
+    - { id: f1, from: { node: trigger }, to: { node: prepare_api_payload } }
+    - {
+        id: f1a,
+        from: { node: prepare_api_payload },
+        to: { node: evaluate_item },
+      }
     - { id: f2, from: { node: evaluate_item }, to: { node: item_decision } }
-    
-    # Percabangan Evaluasi
+
+    # Percabangan Evaluasi: Jika VRule menghasilkan PENDING atau manual approval
     - {
         id: f3,
         from: { node: item_decision },
         to: { node: approval_task },
-        condition: 'rule_result.decision == "REVIEW"',
+        condition: '(rule_result.decision == "PENDING" || prepared_payload.basePrice > 10000000)',
         priority: 10,
       }
     - {
         id: f4,
         from: { node: item_decision },
         to: { node: call_nextjs_api },
-        condition: 'rule_result.decision == "APPROVE"',
-        priority: 20,
+        type: default,
+        priority: 100,
       }
 
-    # Jika disetujui manager, lanjut tulis ke DB
+    # Jika disetujui manager di human task, lanjut tulis ke DB
     - { id: f5, from: { node: approval_task }, to: { node: call_nextjs_api } }
-    
+
     # Setelah DB tertulis, bangun respons dan selesai
     - { id: f6, from: { node: call_nextjs_api }, to: { node: build_response } }
     - { id: f7, from: { node: build_response }, to: { node: respond } }
@@ -129,5 +139,6 @@ spec:
     - { name: trigger_payload, type: object }
     - { name: rule_result, type: object }
     - { name: approval_result, type: object }
+    - { name: prepared_payload, type: object }
     - { name: api_result, type: object }
     - { name: final_payload, type: object }

@@ -17,8 +17,9 @@ rules:
     description: "Stock mencukupi"
     when: "requested_qty <= current_stock"
     then:
-      - kind: SET_DECISION
-        decision: APPROVE
+      - kind: SET_FIELD
+        path: decision
+        value: "APPROVED"
   - id: "STOCK_NOT_AVAILABLE"
     priority: 20
     enabled: true
@@ -30,5 +31,6 @@ rules:
         code: "INSUFFICIENT_STOCK"
         field: "requested_qty"
         msg: "Stock tidak mencukupi"
-      - kind: SET_DECISION
-        decision: REJECT
+      - kind: SET_FIELD
+        path: decision
+        value: "REJECTED"

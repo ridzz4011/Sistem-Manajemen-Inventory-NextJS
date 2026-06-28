@@ -27,7 +27,7 @@ import { ApprovalsTable } from "./approvals-table";
 
 export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
   const [rowSelection, setRowSelection] = React.useState({});
-  const [sorting, setSorting] = React.useState<SortingState>([{ id: "date", desc: true }]);
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
     search: false,

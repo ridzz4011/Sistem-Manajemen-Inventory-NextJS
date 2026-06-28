@@ -17,13 +17,15 @@ rules:
     description: "Jumlah diterima tidak sesuai"
     when: "received_qty != expected_qty"
     then:
-      - kind: SET_DECISION
-        decision: DISPUTE
+      - kind: SET_FIELD
+        path: decision
+        value: "DISPUTE"
   - id: "STOCK_IN_NORMAL"
     priority: 100
     enabled: true
     description: "Jumlah sesuai"
     when: "received_qty == expected_qty"
     then:
-      - kind: SET_DECISION
-        decision: APPROVE
+      - kind: SET_FIELD
+        path: decision
+        value: "APPROVED"

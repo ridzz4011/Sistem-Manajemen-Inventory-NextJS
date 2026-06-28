@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/server/db/prisma";
 import { revalidatePath } from "next/cache";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export async function getValueFromCookie(key: string): Promise<string | undefined> {
   const cookieStore = await cookies();
@@ -84,7 +84,7 @@ export async function submitApprovalRequestAction(type: string, payload: any, us
   try {
     const response = await fetch(`${APP_URL}/api/approvals`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
       body: JSON.stringify({
         type: type, // "NEW_ITEM", "NEW_VENDOR", dll.
         requestedBy: userName,
@@ -93,12 +93,13 @@ export async function submitApprovalRequestAction(type: string, payload: any, us
     });
 
     const result = await response.json();
-    
+
     if (result.success) {
       // Refresh tabel approvals agar antrean baru langsung muncul
       revalidatePath("/dashboard/approvals");
+      revalidatePath("/dashboard/suppliers");
     }
-    
+
     return result;
   } catch (error) {
     console.error("Action error:", error);
@@ -110,19 +111,17 @@ export async function approveRequestAction(requestId: string) {
   try {
     const response = await fetch(`${APP_URL}/api/approvals/approve`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
       body: JSON.stringify({ requestId }),
     });
 
     const result = await response.json();
-    
+
     if (result.success) {
-      // HANYA refresh halaman approvals agar status berubah menjadi APPROVED.
-      // Kita tidak me-refresh /dashboard/products di sini karena VFlow 
-      // yang akan mengisinya di latar belakang.
       revalidatePath("/dashboard/approvals");
+      revalidatePath("/dashboard/suppliers");
     }
-    
+
     return result;
   } catch (error) {
     console.error("Approve Action error:", error);
@@ -134,16 +133,16 @@ export async function rejectRequestAction(requestId: string, notes: string = "Di
   try {
     const response = await fetch(`${APP_URL}/api/approvals/reject`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
       body: JSON.stringify({ requestId, notes }),
     });
 
     const result = await response.json();
-    
+
     if (result.success) {
       revalidatePath("/dashboard/approvals");
     }
-    
+
     return result;
   } catch (error) {
     console.error("Reject Action error:", error);

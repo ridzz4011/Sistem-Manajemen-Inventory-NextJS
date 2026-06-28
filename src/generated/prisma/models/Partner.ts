@@ -20,17 +20,33 @@ export type PartnerModel = runtime.Types.Result.DefaultSelection<Prisma.$Partner
 
 export type AggregatePartner = {
   _count: PartnerCountAggregateOutputType | null
+  _avg: PartnerAvgAggregateOutputType | null
+  _sum: PartnerSumAggregateOutputType | null
   _min: PartnerMinAggregateOutputType | null
   _max: PartnerMaxAggregateOutputType | null
+}
+
+export type PartnerAvgAggregateOutputType = {
+  rating: number | null
+}
+
+export type PartnerSumAggregateOutputType = {
+  rating: number | null
 }
 
 export type PartnerMinAggregateOutputType = {
   id: string | null
   name: string | null
+  contactPerson: string | null
   type: $Enums.EntityType | null
+  status: $Enums.PartnerStatus | null
   email: string | null
   phone: string | null
   address: string | null
+  category: string | null
+  products: string | null
+  rating: number | null
+  joinedDate: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -38,10 +54,16 @@ export type PartnerMinAggregateOutputType = {
 export type PartnerMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  contactPerson: string | null
   type: $Enums.EntityType | null
+  status: $Enums.PartnerStatus | null
   email: string | null
   phone: string | null
   address: string | null
+  category: string | null
+  products: string | null
+  rating: number | null
+  joinedDate: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -49,10 +71,16 @@ export type PartnerMaxAggregateOutputType = {
 export type PartnerCountAggregateOutputType = {
   id: number
   name: number
+  contactPerson: number
   type: number
+  status: number
   email: number
   phone: number
   address: number
+  category: number
+  products: number
+  rating: number
+  joinedDate: number
   metadata: number
   createdAt: number
   updatedAt: number
@@ -60,13 +88,27 @@ export type PartnerCountAggregateOutputType = {
 }
 
 
+export type PartnerAvgAggregateInputType = {
+  rating?: true
+}
+
+export type PartnerSumAggregateInputType = {
+  rating?: true
+}
+
 export type PartnerMinAggregateInputType = {
   id?: true
   name?: true
+  contactPerson?: true
   type?: true
+  status?: true
   email?: true
   phone?: true
   address?: true
+  category?: true
+  products?: true
+  rating?: true
+  joinedDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -74,10 +116,16 @@ export type PartnerMinAggregateInputType = {
 export type PartnerMaxAggregateInputType = {
   id?: true
   name?: true
+  contactPerson?: true
   type?: true
+  status?: true
   email?: true
   phone?: true
   address?: true
+  category?: true
+  products?: true
+  rating?: true
+  joinedDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -85,10 +133,16 @@ export type PartnerMaxAggregateInputType = {
 export type PartnerCountAggregateInputType = {
   id?: true
   name?: true
+  contactPerson?: true
   type?: true
+  status?: true
   email?: true
   phone?: true
   address?: true
+  category?: true
+  products?: true
+  rating?: true
+  joinedDate?: true
   metadata?: true
   createdAt?: true
   updatedAt?: true
@@ -133,6 +187,18 @@ export type PartnerAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: PartnerAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: PartnerSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: PartnerMinAggregateInputType
@@ -163,6 +229,8 @@ export type PartnerGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: PartnerCountAggregateInputType | true
+  _avg?: PartnerAvgAggregateInputType
+  _sum?: PartnerSumAggregateInputType
   _min?: PartnerMinAggregateInputType
   _max?: PartnerMaxAggregateInputType
 }
@@ -170,14 +238,22 @@ export type PartnerGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type PartnerGroupByOutputType = {
   id: string
   name: string
+  contactPerson: string | null
   type: $Enums.EntityType
+  status: $Enums.PartnerStatus
   email: string | null
   phone: string | null
   address: string | null
+  category: string | null
+  products: string | null
+  rating: number | null
+  joinedDate: string | null
   metadata: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: PartnerCountAggregateOutputType | null
+  _avg: PartnerAvgAggregateOutputType | null
+  _sum: PartnerSumAggregateOutputType | null
   _min: PartnerMinAggregateOutputType | null
   _max: PartnerMaxAggregateOutputType | null
 }
@@ -203,10 +279,16 @@ export type PartnerWhereInput = {
   NOT?: Prisma.PartnerWhereInput | Prisma.PartnerWhereInput[]
   id?: Prisma.StringFilter<"Partner"> | string
   name?: Prisma.StringFilter<"Partner"> | string
+  contactPerson?: Prisma.StringNullableFilter<"Partner"> | string | null
   type?: Prisma.EnumEntityTypeFilter<"Partner"> | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFilter<"Partner"> | $Enums.PartnerStatus
   email?: Prisma.StringNullableFilter<"Partner"> | string | null
   phone?: Prisma.StringNullableFilter<"Partner"> | string | null
   address?: Prisma.StringNullableFilter<"Partner"> | string | null
+  category?: Prisma.StringNullableFilter<"Partner"> | string | null
+  products?: Prisma.StringNullableFilter<"Partner"> | string | null
+  rating?: Prisma.FloatNullableFilter<"Partner"> | number | null
+  joinedDate?: Prisma.StringNullableFilter<"Partner"> | string | null
   metadata?: Prisma.JsonNullableFilter<"Partner">
   createdAt?: Prisma.DateTimeFilter<"Partner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Partner"> | Date | string
@@ -216,10 +298,16 @@ export type PartnerWhereInput = {
 export type PartnerOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  contactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrderInput | Prisma.SortOrder
+  products?: Prisma.SortOrderInput | Prisma.SortOrder
+  rating?: Prisma.SortOrderInput | Prisma.SortOrder
+  joinedDate?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -232,10 +320,16 @@ export type PartnerWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PartnerWhereInput[]
   NOT?: Prisma.PartnerWhereInput | Prisma.PartnerWhereInput[]
   name?: Prisma.StringFilter<"Partner"> | string
+  contactPerson?: Prisma.StringNullableFilter<"Partner"> | string | null
   type?: Prisma.EnumEntityTypeFilter<"Partner"> | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFilter<"Partner"> | $Enums.PartnerStatus
   email?: Prisma.StringNullableFilter<"Partner"> | string | null
   phone?: Prisma.StringNullableFilter<"Partner"> | string | null
   address?: Prisma.StringNullableFilter<"Partner"> | string | null
+  category?: Prisma.StringNullableFilter<"Partner"> | string | null
+  products?: Prisma.StringNullableFilter<"Partner"> | string | null
+  rating?: Prisma.FloatNullableFilter<"Partner"> | number | null
+  joinedDate?: Prisma.StringNullableFilter<"Partner"> | string | null
   metadata?: Prisma.JsonNullableFilter<"Partner">
   createdAt?: Prisma.DateTimeFilter<"Partner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Partner"> | Date | string
@@ -245,16 +339,24 @@ export type PartnerWhereUniqueInput = Prisma.AtLeast<{
 export type PartnerOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  contactPerson?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrderInput | Prisma.SortOrder
+  products?: Prisma.SortOrderInput | Prisma.SortOrder
+  rating?: Prisma.SortOrderInput | Prisma.SortOrder
+  joinedDate?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PartnerCountOrderByAggregateInput
+  _avg?: Prisma.PartnerAvgOrderByAggregateInput
   _max?: Prisma.PartnerMaxOrderByAggregateInput
   _min?: Prisma.PartnerMinOrderByAggregateInput
+  _sum?: Prisma.PartnerSumOrderByAggregateInput
 }
 
 export type PartnerScalarWhereWithAggregatesInput = {
@@ -263,10 +365,16 @@ export type PartnerScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PartnerScalarWhereWithAggregatesInput | Prisma.PartnerScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Partner"> | string
   name?: Prisma.StringWithAggregatesFilter<"Partner"> | string
+  contactPerson?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
   type?: Prisma.EnumEntityTypeWithAggregatesFilter<"Partner"> | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusWithAggregatesFilter<"Partner"> | $Enums.PartnerStatus
   email?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
   address?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
+  category?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
+  products?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
+  rating?: Prisma.FloatNullableWithAggregatesFilter<"Partner"> | number | null
+  joinedDate?: Prisma.StringNullableWithAggregatesFilter<"Partner"> | string | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"Partner">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Partner"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Partner"> | Date | string
@@ -275,10 +383,16 @@ export type PartnerScalarWhereWithAggregatesInput = {
 export type PartnerCreateInput = {
   id?: string
   name: string
+  contactPerson?: string | null
   type: $Enums.EntityType
+  status?: $Enums.PartnerStatus
   email?: string | null
   phone?: string | null
   address?: string | null
+  category?: string | null
+  products?: string | null
+  rating?: number | null
+  joinedDate?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -288,10 +402,16 @@ export type PartnerCreateInput = {
 export type PartnerUncheckedCreateInput = {
   id?: string
   name: string
+  contactPerson?: string | null
   type: $Enums.EntityType
+  status?: $Enums.PartnerStatus
   email?: string | null
   phone?: string | null
   address?: string | null
+  category?: string | null
+  products?: string | null
+  rating?: number | null
+  joinedDate?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -301,10 +421,16 @@ export type PartnerUncheckedCreateInput = {
 export type PartnerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -314,10 +440,16 @@ export type PartnerUpdateInput = {
 export type PartnerUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -327,10 +459,16 @@ export type PartnerUncheckedUpdateInput = {
 export type PartnerCreateManyInput = {
   id?: string
   name: string
+  contactPerson?: string | null
   type: $Enums.EntityType
+  status?: $Enums.PartnerStatus
   email?: string | null
   phone?: string | null
   address?: string | null
+  category?: string | null
+  products?: string | null
+  rating?: number | null
+  joinedDate?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -339,10 +477,16 @@ export type PartnerCreateManyInput = {
 export type PartnerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,10 +495,16 @@ export type PartnerUpdateManyMutationInput = {
 export type PartnerUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -363,22 +513,38 @@ export type PartnerUncheckedUpdateManyInput = {
 export type PartnerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  contactPerson?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  products?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  joinedDate?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
+export type PartnerAvgOrderByAggregateInput = {
+  rating?: Prisma.SortOrder
+}
+
 export type PartnerMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  contactPerson?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  products?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  joinedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -386,12 +552,22 @@ export type PartnerMaxOrderByAggregateInput = {
 export type PartnerMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  contactPerson?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   email?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  category?: Prisma.SortOrder
+  products?: Prisma.SortOrder
+  rating?: Prisma.SortOrder
+  joinedDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type PartnerSumOrderByAggregateInput = {
+  rating?: Prisma.SortOrder
 }
 
 export type PartnerNullableScalarRelationFilter = {
@@ -401,6 +577,18 @@ export type PartnerNullableScalarRelationFilter = {
 
 export type EnumEntityTypeFieldUpdateOperationsInput = {
   set?: $Enums.EntityType
+}
+
+export type EnumPartnerStatusFieldUpdateOperationsInput = {
+  set?: $Enums.PartnerStatus
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type PartnerCreateNestedOneWithoutTransactionsInput = {
@@ -422,10 +610,16 @@ export type PartnerUpdateOneWithoutTransactionsNestedInput = {
 export type PartnerCreateWithoutTransactionsInput = {
   id?: string
   name: string
+  contactPerson?: string | null
   type: $Enums.EntityType
+  status?: $Enums.PartnerStatus
   email?: string | null
   phone?: string | null
   address?: string | null
+  category?: string | null
+  products?: string | null
+  rating?: number | null
+  joinedDate?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -434,10 +628,16 @@ export type PartnerCreateWithoutTransactionsInput = {
 export type PartnerUncheckedCreateWithoutTransactionsInput = {
   id?: string
   name: string
+  contactPerson?: string | null
   type: $Enums.EntityType
+  status?: $Enums.PartnerStatus
   email?: string | null
   phone?: string | null
   address?: string | null
+  category?: string | null
+  products?: string | null
+  rating?: number | null
+  joinedDate?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -462,10 +662,16 @@ export type PartnerUpdateToOneWithWhereWithoutTransactionsInput = {
 export type PartnerUpdateWithoutTransactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -474,10 +680,16 @@ export type PartnerUpdateWithoutTransactionsInput = {
 export type PartnerUncheckedUpdateWithoutTransactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  contactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumEntityTypeFieldUpdateOperationsInput | $Enums.EntityType
+  status?: Prisma.EnumPartnerStatusFieldUpdateOperationsInput | $Enums.PartnerStatus
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  joinedDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -517,10 +729,16 @@ export type PartnerCountOutputTypeCountTransactionsArgs<ExtArgs extends runtime.
 export type PartnerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  contactPerson?: boolean
   type?: boolean
+  status?: boolean
   email?: boolean
   phone?: boolean
   address?: boolean
+  category?: boolean
+  products?: boolean
+  rating?: boolean
+  joinedDate?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -531,10 +749,16 @@ export type PartnerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type PartnerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  contactPerson?: boolean
   type?: boolean
+  status?: boolean
   email?: boolean
   phone?: boolean
   address?: boolean
+  category?: boolean
+  products?: boolean
+  rating?: boolean
+  joinedDate?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -543,10 +767,16 @@ export type PartnerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type PartnerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  contactPerson?: boolean
   type?: boolean
+  status?: boolean
   email?: boolean
   phone?: boolean
   address?: boolean
+  category?: boolean
+  products?: boolean
+  rating?: boolean
+  joinedDate?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -555,16 +785,22 @@ export type PartnerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
 export type PartnerSelectScalar = {
   id?: boolean
   name?: boolean
+  contactPerson?: boolean
   type?: boolean
+  status?: boolean
   email?: boolean
   phone?: boolean
   address?: boolean
+  category?: boolean
+  products?: boolean
+  rating?: boolean
+  joinedDate?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PartnerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "email" | "phone" | "address" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["partner"]>
+export type PartnerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "contactPerson" | "type" | "status" | "email" | "phone" | "address" | "category" | "products" | "rating" | "joinedDate" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["partner"]>
 export type PartnerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transactions?: boolean | Prisma.Partner$transactionsArgs<ExtArgs>
   _count?: boolean | Prisma.PartnerCountOutputTypeDefaultArgs<ExtArgs>
@@ -580,10 +816,16 @@ export type $PartnerPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    contactPerson: string | null
     type: $Enums.EntityType
+    status: $Enums.PartnerStatus
     email: string | null
     phone: string | null
     address: string | null
+    category: string | null
+    products: string | null
+    rating: number | null
+    joinedDate: string | null
     metadata: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -1013,10 +1255,16 @@ export interface Prisma__PartnerClient<T, Null = never, ExtArgs extends runtime.
 export interface PartnerFieldRefs {
   readonly id: Prisma.FieldRef<"Partner", 'String'>
   readonly name: Prisma.FieldRef<"Partner", 'String'>
+  readonly contactPerson: Prisma.FieldRef<"Partner", 'String'>
   readonly type: Prisma.FieldRef<"Partner", 'EntityType'>
+  readonly status: Prisma.FieldRef<"Partner", 'PartnerStatus'>
   readonly email: Prisma.FieldRef<"Partner", 'String'>
   readonly phone: Prisma.FieldRef<"Partner", 'String'>
   readonly address: Prisma.FieldRef<"Partner", 'String'>
+  readonly category: Prisma.FieldRef<"Partner", 'String'>
+  readonly products: Prisma.FieldRef<"Partner", 'String'>
+  readonly rating: Prisma.FieldRef<"Partner", 'Float'>
+  readonly joinedDate: Prisma.FieldRef<"Partner", 'String'>
   readonly metadata: Prisma.FieldRef<"Partner", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Partner", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Partner", 'DateTime'>

@@ -1296,10 +1296,16 @@ export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof Item
 export const PartnerScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  contactPerson: 'contactPerson',
   type: 'type',
+  status: 'status',
   email: 'email',
   phone: 'phone',
   address: 'address',
+  category: 'category',
+  products: 'products',
+  rating: 'rating',
+  joinedDate: 'joinedDate',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1555,6 +1561,34 @@ export type ListEnumEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'PartnerStatus'
+ */
+export type EnumPartnerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PartnerStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PartnerStatus[]'
+ */
+export type ListEnumPartnerStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PartnerStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1635,20 +1669,6 @@ export type EnumApprovalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'ApprovalStatus[]'
  */
 export type ListEnumApprovalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ApprovalStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**

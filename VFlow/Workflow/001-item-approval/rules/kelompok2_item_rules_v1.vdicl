@@ -17,13 +17,15 @@ rules:
     description: "Barang bernilai tinggi"
     when: "item_price > 10000000"
     then:
-      - kind: SET_DECISION
-        decision: REVIEW
+      - kind: SET_FIELD
+        path: decision
+        value: "PENDING"
   - id: "NORMAL_ITEM"
     priority: 100
     enabled: true
     description: "Barang normal"
     when: "item_price <= 10000000"
     then:
-      - kind: SET_DECISION
-        decision: APPROVE
+      - kind: SET_FIELD
+        path: decision
+        value: "APPROVED"

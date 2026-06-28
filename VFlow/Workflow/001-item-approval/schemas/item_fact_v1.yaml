@@ -8,3 +8,6 @@ fields:
   - path: item_price
     scalar: F64
     nullable: false
+  - path: decision
+    scalar: SYM
+    nullable: true

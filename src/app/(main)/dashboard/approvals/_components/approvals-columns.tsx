@@ -55,43 +55,47 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
   },
   {
     accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <div className="grid min-w-0 gap-1">
-        <div className="truncate font-medium text-foreground text-sm">{row.original.id}</div>
-        <div className="truncate text-muted-foreground text-xs">{row.original.type}</div>
-      </div>
-    ),
+    header: "Nama",
+    cell: ({ row }) => {
+      const payload = row.original.payload as any;
+      const itemName = payload?.item_name || payload?.name || row.original.id;
+      return (
+        <div className="grid min-w-0 gap-1">
+          <div className="truncate font-medium text-foreground text-sm">{itemName}</div>
+          <div className="truncate text-muted-foreground text-xs">{payload?.item_sku}</div>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "requestedBy",
-    header: "Requested By",
+    header: "Permintaan dari",
     cell: ({ row }) => <div className="text-foreground text-sm">{row.original.requestedBy}</div>,
   },
   {
     id: "details",
-    header: "Details",
+    header: "Detail",
     cell: ({ row }) => {
       // Melakukan parsing data JSON form dari kolom payload
       const payload = row.original.payload as any;
       if (!payload) return <span className="text-muted-foreground">-</span>;
-      
+
       if (row.original.type === "NEW_ITEM") {
-        return <div className="max-w-75 truncate text-sm">Item: {payload.name} (SKU: {payload.sku})</div>;
+        return <div className="max-w-75 truncate text-sm">Harga: Rp. {payload?.item_price.toLocaleString('id-ID')}</div>;
       }
       if (row.original.type === "NEW_VENDOR") {
-        return <div className="max-w-75 truncate text-sm">Vendor: {payload.name}</div>;
+        return <div className="max-w-75 truncate text-sm">Vendor: {payload?.vendor_name || payload?.name}</div>;
       }
       return <div className="max-w-75 truncate text-sm text-muted-foreground">Transaksi Inventory ID: {row.original.id}</div>;
     },
   },
   {
     accessorKey: "createdAt",
-    header: "Date",
+    header: "Tanggal Permintaan",
     cell: ({ row }) => (
       <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
         <Clock className="size-3.5" />
-        <span>{new Date(row.original.createdAt).toLocaleDateString("id-ID")}</span>
+        <span suppressHydrationWarning>{new Date(row.original.createdAt).toLocaleDateString("id-ID")}</span>
       </div>
     ),
   },
@@ -154,17 +158,17 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuItem>View JSON Payload</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleApprove}
                 className="text-emerald-600 focus:text-emerald-700 font-medium"
               >
-                <CheckCircle2 className="mr-2 size-4" /> Approve
+                <CheckCircle2 className="mr-2 size-4" /> Setuju
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleReject}
                 className="text-rose-600 focus:text-rose-700 font-medium"
               >
-                <XCircle className="mr-2 size-4" /> Reject
+                <XCircle className="mr-2 size-4" /> Tolak
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

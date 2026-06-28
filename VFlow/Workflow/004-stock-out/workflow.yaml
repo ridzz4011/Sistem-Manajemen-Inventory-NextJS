@@ -25,7 +25,7 @@ spec:
       activity_type: VRule
 
       rule_config:
-        rule_set_id: stock_out_rules_v1
+        rule_set_id: kelompok2_stock_out_rules_v1
 
       input_mappings:
         - target: current_stock
@@ -74,13 +74,13 @@ spec:
         url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-out/approve"
         headers:
           "Content-Type": "application/json"
-          "Authorization": 'Bearer ${API_SECRET_KEY}'
+          "Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA"
 
       input_mappings:
         - target: body
           source:
             language: v-cel
-            source: '{"transactionId": trigger_payload.body.transactionId}'
+            source: '{"requestId": trigger_payload.body.requestId, "transactionId": trigger_payload.body.transactionId}'
 
       output_variable: stock_out_result
 
@@ -125,19 +125,19 @@ spec:
     - { id: f2, from: { node: validate_stock }, to: { node: stock_decision } }
 
     - {
-        id: f3,
+        id: f4,
         from: { node: stock_decision },
-        to: { node: approval_task },
-        condition: 'stock_validation.decision == "APPROVE"',
+        to: { node: rejected_response },
+        condition: 'stock_validation.decision == "REJECT" || stock_validation.decision == "REJECTED"',
         priority: 10,
       }
 
     - {
-        id: f4,
+        id: f3,
         from: { node: stock_decision },
-        to: { node: rejected_response },
-        condition: 'stock_validation.decision == "REJECT"',
-        priority: 20,
+        to: { node: execute_stock_out },
+        type: default,
+        priority: 100,
       }
 
     - { id: f5, from: { node: approval_task }, to: { node: execute_stock_out } }

@@ -9,7 +9,6 @@ metadata:
 
 spec:
   activities:
-
     - id: trigger
       activity_type: Trigger
 
@@ -30,7 +29,7 @@ spec:
       activity_type: VRule
 
       rule_config:
-        rule_set_id: stock_in_rules_v1
+        rule_set_id: kelompok2_stock_in_rules_v1
 
       input_mappings:
         - target: expected_qty
@@ -104,13 +103,13 @@ spec:
         url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-in/approve"
         headers:
           "Content-Type": "application/json"
-          "Authorization": 'Bearer ${API_SECRET_KEY}'
+          "Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA"
 
       input_mappings:
         - target: body
           source:
             language: v-cel
-            source: '{"transactionId": trigger_payload.body.transactionId}'
+            source: '{"requestId": trigger_payload.body.requestId, "transactionId": trigger_payload.body.transactionId}'
 
       output_variable: inventory_result
 
@@ -139,32 +138,43 @@ spec:
       activity_type: End
 
   flows:
-
     - { id: f1, from: { node: trigger }, to: { node: validate_stock_in } }
 
-    - { id: f2, from: { node: validate_stock_in }, to: { node: stock_in_decision } }
-
     - {
-        id: f3,
-        from: { node: stock_in_decision },
-        to: { node: normal_approval },
-        condition: 'rule_result.decision == "APPROVE"',
-        priority: 10
+        id: f2,
+        from: { node: validate_stock_in },
+        to: { node: stock_in_decision },
       }
 
     - {
         id: f4,
         from: { node: stock_in_decision },
         to: { node: dispute_review },
-        condition: 'rule_result.decision == "DISPUTE"',
-        priority: 20
+        condition: 'rule_result.decision == "DISPUTE" && trigger_payload.body.is_manual_approval != true',
+        priority: 10,
       }
 
-    - { id: f5, from: { node: normal_approval }, to: { node: update_inventory } }
+    - {
+        id: f3,
+        from: { node: stock_in_decision },
+        to: { node: normal_approval },
+        type: default,
+        priority: 100,
+      }
+
+    - {
+        id: f5,
+        from: { node: normal_approval },
+        to: { node: update_inventory },
+      }
 
     - { id: f6, from: { node: dispute_review }, to: { node: update_inventory } }
 
-    - { id: f7, from: { node: update_inventory }, to: { node: completed_response } }
+    - {
+        id: f7,
+        from: { node: update_inventory },
+        to: { node: completed_response },
+      }
 
     - { id: f8, from: { node: completed_response }, to: { node: respond } }
 

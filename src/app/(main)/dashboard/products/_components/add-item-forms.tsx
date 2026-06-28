@@ -25,8 +25,9 @@ export function AddItemForm({ onSuccess }: AddItemFormProps) {
     const data = {
       item_sku: formData.get("sku") as string,
       item_name: formData.get("name") as string,
-      item_price: Number(formData.get("price")),
+      item_price: Number(formData.get("basePrice") ?? formData.get("price")),
       item_uom: formData.get("uom") as string,
+      item_description: formData.get("description") as string,
     };
 
     // Panggil Server Action

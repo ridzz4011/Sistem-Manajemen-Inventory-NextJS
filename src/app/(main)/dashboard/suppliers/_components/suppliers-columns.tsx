@@ -70,7 +70,7 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
   },
   {
     accessorKey: "name",
-    header: "Supplier",
+    header: "Vendor / Supplier",
     cell: ({ row }) => (
       <div className="grid min-w-0 gap-1">
         <div className="truncate font-medium text-foreground text-sm">{row.original.name}</div>
@@ -80,13 +80,13 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: "Kategori",
     filterFn: "equalsString",
     cell: ({ row }) => <div className="text-sm">{row.original.category}</div>,
   },
   {
     accessorKey: "contactPerson",
-    header: "Contact",
+    header: "Kontak Person",
     cell: ({ row }) => (
       <div className="grid gap-1">
         <div className="text-foreground text-sm">{row.original.contactPerson}</div>
@@ -103,7 +103,7 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
   },
   {
     accessorKey: "products",
-    header: "Products",
+    header: "Produk / Barang",
     cell: ({ row }) => <div className="text-sm">{row.original.products}</div>,
   },
   {
@@ -114,23 +114,23 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
   },
   {
     accessorKey: "rating",
-    header: "Rating",
+    header: "Penilaian",
     cell: ({ row }) => <RatingCell rating={row.original.rating} />,
   },
   {
     accessorKey: "joinedDate",
-    header: "Joined date",
+    header: "Tanggal Bergabung",
     cell: ({ row }) => <div className="text-foreground text-sm">{row.original.joinedDate}</div>,
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">Aksi</div>,
     cell: ({ row }) => (
       <div className="text-right">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              aria-label={`Open actions for ${row.original.name}`}
+              aria-label={`Buka aksi untuk ${row.original.name}`}
               className="size-8 rounded-md text-muted-foreground hover:bg-muted/50"
               size="icon-sm"
               variant="ghost"
@@ -139,11 +139,11 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>View supplier</DropdownMenuItem>
-            <DropdownMenuItem>Edit supplier</DropdownMenuItem>
-            <DropdownMenuItem>View purchase history</DropdownMenuItem>
+            <DropdownMenuItem>Lihat Detail Vendor</DropdownMenuItem>
+            <DropdownMenuItem>Edit Vendor</DropdownMenuItem>
+            <DropdownMenuItem>Lihat Riwayat Pembelian</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Deactivate supplier</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Nonaktifkan Vendor</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

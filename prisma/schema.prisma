@@ -55,6 +55,13 @@ enum ApprovalType {
   STOCK_OPNAME
 }
 
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
 model Role {
   id          String   @id @default(cuid())
   name        RoleType @unique
@@ -84,12 +91,18 @@ model Item {
 }
 
 model Partner {
-  id      String     @id @default(cuid())
-  name    String
-  type    EntityType
-  email   String?
-  phone   String?
-  address String?
+  id            String        @id @default(cuid())
+  name          String
+  contactPerson String?
+  type          EntityType
+  status        PartnerStatus @default(Pending)
+  email         String?
+  phone         String?
+  address       String?
+  category      String?
+  products      String?
+  rating        Float?        @default(0.0)
+  joinedDate    String?       @default("-")
 
   metadata Json?
 

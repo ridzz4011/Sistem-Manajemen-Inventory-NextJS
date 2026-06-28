@@ -10,7 +10,6 @@ metadata:
 
 spec:
   activities:
-
     - id: trigger
       activity_type: Trigger
 
@@ -63,7 +62,7 @@ spec:
       activity_type: VRule
 
       rule_config:
-        rule_set_id: stock_opname_rules_v1
+        rule_set_id: kelompok2_stock_opname_rules_v1
 
       input_mappings:
         - target: stock_difference
@@ -120,13 +119,13 @@ spec:
         url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-opname/approve"
         headers:
           "Content-Type": "application/json"
-          "Authorization": 'Bearer ${API_SECRET_KEY}'
+          "Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA"
 
       input_mappings:
         - target: body
           source:
             language: v-cel
-            source: '{"stock_difference": difference_result.stock_difference}'
+            source: '{"requestId": trigger_payload.body.requestId, "stock_difference": difference_result.stock_difference}'
 
       output_variable: inventory_result
 
@@ -157,31 +156,47 @@ spec:
   flows:
     - { id: f1, from: { node: trigger }, to: { node: calculate_difference } }
 
-    - { id: f2, from: { node: calculate_difference }, to: { node: classify_opname } }
+    - {
+        id: f2,
+        from: { node: calculate_difference },
+        to: { node: classify_opname },
+      }
 
     - { id: f3, from: { node: classify_opname }, to: { node: opname_decision } }
-
-    - {
-        id: f4,
-        from: { node: opname_decision },
-        to: { node: kepala_gudang_approval },
-        condition: 'rule_result.decision == "APPROVE"',
-        priority: 10
-      }
 
     - {
         id: f5,
         from: { node: opname_decision },
         to: { node: direktur_review },
-        condition: 'rule_result.decision == "INVESTIGATE"',
-        priority: 20
+        condition: 'rule_result.decision == "PENDING" && trigger_payload.body.is_manual_approval != true',
+        priority: 10,
       }
 
-    - { id: f6, from: { node: kepala_gudang_approval }, to: { node: update_inventory } }
+    - {
+        id: f4,
+        from: { node: opname_decision },
+        to: { node: update_inventory },
+        type: default,
+        priority: 100,
+      }
 
-    - { id: f7, from: { node: direktur_review }, to: { node: update_inventory } }
+    - {
+        id: f6,
+        from: { node: kepala_gudang_approval },
+        to: { node: update_inventory },
+      }
 
-    - { id: f8, from: { node: update_inventory }, to: { node: completed_response } }
+    - {
+        id: f7,
+        from: { node: direktur_review },
+        to: { node: update_inventory },
+      }
+
+    - {
+        id: f8,
+        from: { node: update_inventory },
+        to: { node: completed_response },
+      }
 
     - { id: f9, from: { node: completed_response }, to: { node: respond } }
 
