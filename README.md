@@ -2,6 +2,8 @@
 
 <div align="center">
 
+![Dashboard Utama Sistem Manajemen Inventory](./assets/dashboard.png)
+
 **Aplikasi manajemen inventaris berbasis web yang terintegrasi dengan VFlow Workflow Engine untuk otomasi proses bisnis.**
 
 Dibangun menggunakan **Next.js 16** · **Prisma ORM** · **PostgreSQL** · **VFlow SQA Runtime** · **VRule Decision Engine**
@@ -90,8 +92,7 @@ Sistem Manajemen Inventory ini adalah aplikasi web full-stack yang mengelola sik
 
 ### 1. 📦 Manajemen Produk — Halaman Produk
 
-<!-- TODO: Ganti placeholder di bawah dengan screenshot halaman Produk -->
-> 📸 **Screenshot:** `[Placeholder — Tambahkan screenshot halaman Produk di sini]`
+![Halaman Produk](./assets/product1.png)
 
 **Halaman:** `/dashboard/products`
 **Workflow VFlow:** `001-item-approval`
@@ -132,8 +133,7 @@ flowchart TD
 
 ### 2. 🏭 Manajemen Supplier — Halaman Supplier
 
-<!-- TODO: Ganti placeholder di bawah dengan screenshot halaman Supplier -->
-> 📸 **Screenshot:** `[Placeholder — Tambahkan screenshot halaman Supplier di sini]`
+![Halaman Supplier](./assets/supplier.png)
 
 **Halaman:** `/dashboard/suppliers`
 **Workflow VFlow:** `002-vendor-onboarding`
@@ -178,8 +178,7 @@ flowchart TD
 
 ### 3. 📄 Transaksi Inventaris — Halaman Faktur
 
-<!-- TODO: Ganti placeholder di bawah dengan screenshot halaman Faktur -->
-> 📸 **Screenshot:** `[Placeholder — Tambahkan screenshot halaman Faktur di sini]`
+![Halaman Faktur](./assets/invoice.png)
 
 **Halaman:** `/dashboard/invoice`
 **Workflow VFlow:** `003-stock-in` dan `004-stock-out`
@@ -242,8 +241,7 @@ flowchart TD
 
 ### 4. ✅ Pusat Persetujuan — Halaman Persetujuan
 
-<!-- TODO: Ganti placeholder di bawah dengan screenshot halaman Persetujuan -->
-> 📸 **Screenshot:** `[Placeholder — Tambahkan screenshot halaman Persetujuan di sini]`
+![Halaman Persetujuan](./assets/approval.png)
 
 **Halaman:** `/dashboard/approvals`
 
