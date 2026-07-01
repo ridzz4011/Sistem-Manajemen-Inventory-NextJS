@@ -439,7 +439,7 @@ Sistem-Manajemen-Inventory-NextJS/
 
 <div align="center">
 
-Dibuat oleh **Kelompok 2** — Proyek Magang Sistem Manajemen Inventory
+Dibuat oleh **Kelompok 2** — Proyek Magang Vastar Sistem Manajemen Inventory
 
 </div>
 
