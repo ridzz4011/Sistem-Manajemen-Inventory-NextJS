@@ -17,7 +17,8 @@ spec:
       activity_type: Trigger
       trigger_config:
         trigger_type: webhook
-        webhook_config: { path: /webhook/kelompok2/inventory/item/create, method: POST }
+        webhook_config:
+          { path: /webhook/kelompok2/inventory/item/create, method: POST }
         response_framing: length_prefixed
         end_activity: respond-approved
       output_variable: trigger_payload
@@ -47,7 +48,8 @@ spec:
         version_policy: latest
       input_mappings:
         - target: item_price
-          source: { language: spv1, source: "$.trigger_payload.body.item_price" }
+          source:
+            { language: spv1, source: "$.trigger_payload.body.item_price" }
       output_variable: rule_result
 
     - id: decision
@@ -80,7 +82,11 @@ spec:
         timeout_ms: 5000
       input_mappings:
         - target: url
-          source: { language: literal, source: "https://iphone-brutishly-subplot.ngrok-free.dev/api/items/create" }
+          source:
+            {
+              language: literal,
+              source: "https://sistem-manajemen-inventory-next-js.vercel.app/api/items/create",
+            }
         - target: headers
           source:
             language: vil-expr
@@ -128,15 +134,56 @@ spec:
     - { id: f01, from: { node: trigger }, to: { node: validate_item } }
     - { id: f02, from: { node: validate_item }, to: { node: item_rules } }
     - { id: f03, from: { node: item_rules }, to: { node: decision } }
-    - { id: f04, from: { node: decision }, to: { node: call_nextjs_api }, condition: 'rule_result.decision == "ACCEPT"', priority: 30 }
-    - { id: f05, from: { node: decision }, to: { node: approval_task }, condition: 'rule_result.decision == "REVIEW" && trigger_payload.body.is_manual_approval != true', priority: 20 }
-    - { id: f06, from: { node: decision }, to: { node: failed_response }, type: default, priority: 0 }
+    - {
+        id: f04,
+        from: { node: decision },
+        to: { node: call_nextjs_api },
+        condition: 'rule_result.decision == "ACCEPT"',
+        priority: 30,
+      }
+    - {
+        id: f05,
+        from: { node: decision },
+        to: { node: approval_task },
+        condition: 'rule_result.decision == "REVIEW" && trigger_payload.body.is_manual_approval != true',
+        priority: 20,
+      }
+    - {
+        id: f06,
+        from: { node: decision },
+        to: { node: failed_response },
+        type: default,
+        priority: 0,
+      }
     - { id: f07, from: { node: approval_task }, to: { node: call_nextjs_api } }
-    - { id: f08, from: { node: call_nextjs_api }, to: { node: approved_response } }
-    - { id: f09, type: error, from: { node: validate_item }, to: { node: failed_response } }
-    - { id: f10, type: error, from: { node: item_rules }, to: { node: failed_response } }
-    - { id: f11, type: error, from: { node: call_nextjs_api }, to: { node: failed_response } }
-    - { id: f12, from: { node: approved_response }, to: { node: respond-approved } }
+    - {
+        id: f08,
+        from: { node: call_nextjs_api },
+        to: { node: approved_response },
+      }
+    - {
+        id: f09,
+        type: error,
+        from: { node: validate_item },
+        to: { node: failed_response },
+      }
+    - {
+        id: f10,
+        type: error,
+        from: { node: item_rules },
+        to: { node: failed_response },
+      }
+    - {
+        id: f11,
+        type: error,
+        from: { node: call_nextjs_api },
+        to: { node: failed_response },
+      }
+    - {
+        id: f12,
+        from: { node: approved_response },
+        to: { node: respond-approved },
+      }
     - { id: f13, from: { node: failed_response }, to: { node: respond-failed } }
     - { id: f14, from: { node: respond-approved }, to: { node: end } }
     - { id: f15, from: { node: respond-failed }, to: { node: end } }

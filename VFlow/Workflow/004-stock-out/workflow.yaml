@@ -71,7 +71,7 @@ spec:
 
       http_config:
         method: POST
-        url: "https://iphone-brutishly-subplot.ngrok-free.dev/api/stock-out/approve"
+        url: "https://sistem-manajemen-inventory-next-js.vercel.app/api/stock-out/approve"
         headers:
           "Content-Type": "application/json"
           "Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA"
