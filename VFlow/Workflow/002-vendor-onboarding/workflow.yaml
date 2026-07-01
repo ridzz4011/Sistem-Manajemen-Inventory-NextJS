@@ -1,202 +1,175 @@
 version: "3.0"
-
 metadata:
-  id: kelompok2-vendor-onboarding
+  id: webhook/kelompok2-vendor-onboarding-v1
   name: "Vendor Onboarding Workflow"
+  workflow_version: "1.0.0"
   description: |
-    Workflow onboarding vendor baru dengan validasi
-    dan approval Manager Pembelian.
+    Workflow onboarding vendor baru. Vendor blacklist ditolak otomatis,
+    sedangkan vendor valid masuk approval Manager Pembelian sebelum
+    callback ke Next.js mengaktifkan supplier dan menyetujui request.
+  dialect: vflow
+  tags: [inventory, vendor, supplier, approval, vrule, nextjs]
 
 spec:
   activities:
     - id: trigger
       activity_type: Trigger
-
       trigger_config:
         trigger_type: webhook
-
-        webhook_config:
-          path: /webhook/kelompok2/inventory/vendor/register
-          method: POST
-
+        webhook_config: { path: /webhook/kelompok2/inventory/vendor/register, method: POST }
         response_framing: length_prefixed
-
         end_activity: respond-approved
-
       output_variable: trigger_payload
 
-    - id: prepare_vendor_payload
-      activity_type: Transform
-      input_mappings:
-        - target: payload
-          source:
-            language: v-cel
-            source: '{"requestId": trigger_body.requestId, "name": trigger_body.vendor_name, "contactInfo": trigger_body.vendor_contact}'
-      output_variable: prepared_payload
+    - id: validate_vendor
+      activity_type: Validate
+      validate_config:
+        input: "$.trigger_payload.body"
+        schema:
+          required: [requestId, vendor_name, vendor_status]
+          properties:
+            requestId: { type: string, min_length: 3 }
+            type: { type: string }
+            partnerId: { type: string }
+            vendor_name: { type: string, min_length: 1 }
+            vendor_contactPerson: { type: string }
+            vendor_contact: { type: string }
+            vendor_phone: { type: string }
+            vendor_email: { type: string }
+            vendor_address: { type: string }
+            vendor_category: { type: string }
+            vendor_products: { type: string }
+            vendor_rating: { type: number }
+            vendor_status: { type: string, min_length: 1 }
+            is_manual_approval: { type: boolean }
+      output_variable: validated_vendor
 
-    - id: evaluate_vendor
+    - id: vendor_rules
       activity_type: VRule
-
       rule_config:
         rule_set_id: kelompok2_vendor_rules_v1
-
+        rule_pack: "rules/kelompok2_vendor_rules_v1.vdicl"
+        version_policy: latest
       input_mappings:
         - target: vendor_status
-          source:
-            language: spv1
-            source: "$.trigger_payload.body.vendor_status"
-
+          source: { language: spv1, source: "$.trigger_payload.body.vendor_status" }
       output_variable: rule_result
 
-    - id: vendor_decision
+    - id: decision
       activity_type: Exclusive
+      description: "VRule decides whether the vendor is rejected or needs manager approval."
 
     - id: approval_task
       activity_type: HumanTask
-
       persistence: ssot
-
       human_task_config:
         task_type: vendor-approval
-
         assignee: manager_pembelian
-
         title: "Vendor Approval"
-
         description: "Persetujuan vendor baru"
-
         priority: 90
-
       input_mappings:
         - target: vendor
-          source:
-            language: spv1
-            source: "$.trigger_payload.body"
-
+          source: { language: spv1, source: "$.trigger_payload.body" }
+        - target: rule
+          source: { language: spv1, source: "$.rule_result" }
       output_variable: approval_result
 
     - id: call_nextjs_vendor_api
       activity_type: Connector
+      persistence: ssot
+      description: "Callback ke Next.js untuk mengaktifkan supplier dan menyetujui ApprovalRequest."
       connector_config:
         connector_ref: vastar.http
         operation: post
-        config:
-          bearer_token: "KELOMPOK-2-JAYA-JAYA-JAYA"
+        timeout_ms: 5000
       input_mappings:
         - target: url
-          source:
-            {
-              language: literal,
-              source: "https://iphone-brutishly-subplot.ngrok-free.dev/api/suppliers",
-            }
+          source: { language: literal, source: "https://iphone-brutishly-subplot.ngrok-free.dev/api/suppliers" }
         - target: headers
           source:
-            language: literal
-            source: '{"Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA", "Content-Type": "application/json", "ngrok-skip-browser-warning": "true"}'
+            language: vil-expr
+            source: '{ "Authorization": "Bearer KELOMPOK-2-JAYA-JAYA-JAYA", "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" }'
         - target: body
-          source: { language: spv1, source: "$.prepared_payload" }
+          source:
+            language: v-cel
+            source: '{"requestId": trigger_payload.body.requestId, "partnerId": trigger_payload.body.partnerId, "type": trigger_payload.body.type, "vendor_name": trigger_payload.body.vendor_name, "vendor_contactPerson": trigger_payload.body.vendor_contactPerson, "vendor_contact": trigger_payload.body.vendor_contact, "vendor_phone": trigger_payload.body.vendor_phone, "vendor_email": trigger_payload.body.vendor_email, "vendor_address": trigger_payload.body.vendor_address, "vendor_category": trigger_payload.body.vendor_category, "vendor_products": trigger_payload.body.vendor_products, "vendor_rating": trigger_payload.body.vendor_rating, "vendor_status": trigger_payload.body.vendor_status}'
       output_variable: api_result
 
     - id: approved_response
       activity_type: Transform
-
       input_mappings:
         - target: response
           source:
-            language: literal
-            source: '{"status":"approved"}'
-
+            language: v-cel
+            source: '{"status": "approved", "requestId": trigger_payload.body.requestId, "decision": rule_result.decision, "rule": rule_result, "api_response": api_result}'
       output_variable: approved_response
 
     - id: rejected_response
       activity_type: Transform
-
       input_mappings:
         - target: response
           source:
-            language: literal
-            source: '{"status":"rejected","reason":"blacklisted_vendor"}'
-
+            language: v-cel
+            source: '{"status": "rejected", "requestId": trigger_payload.body.requestId, "reason": "blacklisted_vendor", "decision": rule_result.decision, "rule": rule_result}'
       output_variable: rejected_response
+
+    - id: failed_response
+      activity_type: Transform
+      input_mappings:
+        - target: response
+          source:
+            language: v-cel
+            source: '{"status": "vendor_onboarding_failed", "requestId": trigger_payload.body.requestId, "reason": "workflow_error"}'
+      output_variable: failed_response
 
     - id: respond-approved
       activity_type: EndTrigger
-
       end_trigger_config:
         trigger_ref: trigger
-
-        final_response:
-          language: spv1
-          source: "$.approved_response"
+        final_response: { language: spv1, source: "$.approved_response" }
 
     - id: respond-rejected
       activity_type: EndTrigger
-
       end_trigger_config:
         trigger_ref: trigger
+        final_response: { language: spv1, source: "$.rejected_response" }
 
-        final_response:
-          language: spv1
-          source: "$.rejected_response"
+    - id: respond-failed
+      activity_type: EndTrigger
+      end_trigger_config:
+        trigger_ref: trigger
+        final_response: { language: spv1, source: "$.failed_response" }
 
     - id: end
       activity_type: End
 
   flows:
-    - { id: f0, from: { node: trigger }, to: { node: prepare_vendor_payload } }
-
-    - { id: f1, from: { node: prepare_vendor_payload }, to: { node: evaluate_vendor } }
-
-    - { id: f2, from: { node: evaluate_vendor }, to: { node: vendor_decision } }
-
-    - {
-        id: f3,
-        from: { node: vendor_decision },
-        to: { node: approval_task },
-        condition: 'rule_result.decision == "PENDING"',
-        priority: 10,
-      }
-
-    - {
-        id: f4,
-        from: { node: vendor_decision },
-        to: { node: rejected_response },
-        condition: 'rule_result.decision == "REJECTED"',
-        priority: 20,
-      }
-
-    - {
-        id: f4_approved,
-        from: { node: vendor_decision },
-        to: { node: call_nextjs_vendor_api },
-        type: default,
-        priority: 100,
-      }
-
-    - {
-        id: f5,
-        from: { node: approval_task },
-        to: { node: call_nextjs_vendor_api },
-      }
-    - {
-        id: f6,
-        from: { node: call_nextjs_vendor_api },
-        to: { node: approved_response },
-      }
-    - {
-        id: f7,
-        from: { node: approved_response },
-        to: { node: respond-approved },
-      }
-
-    - { id: f8, from: { node: respond-approved }, to: { node: end } }
-
-    - { id: f9, from: { node: respond-rejected }, to: { node: end } }
+    - { id: f01, from: { node: trigger }, to: { node: validate_vendor } }
+    - { id: f02, from: { node: validate_vendor }, to: { node: vendor_rules } }
+    - { id: f03, from: { node: vendor_rules }, to: { node: decision } }
+    - { id: f04, from: { node: decision }, to: { node: approval_task }, condition: 'rule_result.decision == "REVIEW" && trigger_payload.body.is_manual_approval != true', priority: 30 }
+    - { id: f05, from: { node: decision }, to: { node: call_nextjs_vendor_api }, condition: 'rule_result.decision == "REVIEW" && trigger_payload.body.is_manual_approval == true', priority: 25 }
+    - { id: f06, from: { node: decision }, to: { node: rejected_response }, condition: 'rule_result.decision == "REJECT" || trigger_payload.body.decision == "REJECTED"', priority: 20 }
+    - { id: f07, from: { node: decision }, to: { node: failed_response }, type: default, priority: 0 }
+    - { id: f08, from: { node: approval_task }, to: { node: call_nextjs_vendor_api } }
+    - { id: f09, from: { node: call_nextjs_vendor_api }, to: { node: approved_response } }
+    - { id: f10, type: error, from: { node: validate_vendor }, to: { node: failed_response } }
+    - { id: f11, type: error, from: { node: vendor_rules }, to: { node: failed_response } }
+    - { id: f12, type: error, from: { node: call_nextjs_vendor_api }, to: { node: failed_response } }
+    - { id: f13, from: { node: approved_response }, to: { node: respond-approved } }
+    - { id: f14, from: { node: rejected_response }, to: { node: respond-rejected } }
+    - { id: f15, from: { node: failed_response }, to: { node: respond-failed } }
+    - { id: f16, from: { node: respond-approved }, to: { node: end } }
+    - { id: f17, from: { node: respond-rejected }, to: { node: end } }
+    - { id: f18, from: { node: respond-failed }, to: { node: end } }
 
   variables:
     - { name: trigger_payload, type: object }
-    - { name: prepared_payload, type: object }
+    - { name: validated_vendor, type: object }
     - { name: rule_result, type: object }
     - { name: approval_result, type: object }
+    - { name: api_result, type: object }
     - { name: approved_response, type: object }
     - { name: rejected_response, type: object }
+    - { name: failed_response, type: object }

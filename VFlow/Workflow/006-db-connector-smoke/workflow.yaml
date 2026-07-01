@@ -1,0 +1,45 @@
+version: "3.0"
+metadata:
+  id: kelompok2-db-connector-smoke-v1
+  name: "Kelompok 2 DB Connector Smoke"
+  description: |
+    Read-only smoke workflow for checking the kelompok2-inventory primary
+    database connection pack from VFlow.
+  workflow_version: "1.0.0"
+  dialect: vflow
+  tags: [inventory, db, connector, smoke]
+
+spec:
+  activities:
+    - id: trigger
+      activity_type: Trigger
+      trigger_config:
+        trigger_type: cron
+        schedule: "10s"
+        path: /internal/kelompok2/inventory/db-smoke
+      output_variable: tick
+
+    - id: count_items
+      activity_type: Connector
+      persistence: ssot
+      connector_config:
+        connector_ref: "pack://kelompok2-inventory/primary"
+        operation: raw_query
+        timeout_ms: 5000
+      input_mappings:
+        - target: query
+          source:
+            language: literal
+            source: 'SELECT COUNT(*)::int AS item_count FROM "Item"'
+      output_variable: item_count_result
+
+    - id: end
+      activity_type: End
+
+  flows:
+    - { id: f01, from: { node: trigger }, to: { node: count_items } }
+    - { id: f02, from: { node: count_items }, to: { node: end } }
+
+  variables:
+    - { name: tick, type: object }
+    - { name: item_count_result, type: object }

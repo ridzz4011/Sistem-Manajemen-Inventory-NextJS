@@ -17,8 +17,8 @@ services:
       - /app/.next
     env_file:
       - .env
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
   ngrok:
     image: ngrok/ngrok:latest
     restart: unless-stopped
@@ -32,19 +32,19 @@ services:
       - "4040:4040" # Port untuk melihat dashboard Ngrok secara lokal
     depends_on:
       - web
-  db: # Membuat container database postgres untuk menyimpan data inventory
-    container_name: nextjs-inv-db
-    image: postgres:18.4-alpine
-    restart: always
-    environment:
-      POSTGRES_DB: $POSTGRES_DB
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-    ports:
-      - "5432:5432"
-    expose:
-      - "5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-volumes:
-  db_data:
+#   db: # Membuat container database postgres untuk menyimpan data inventory
+#     container_name: nextjs-inv-db
+#     image: postgres:18.4-alpine
+#     restart: always
+#     environment:
+#       POSTGRES_DB: $POSTGRES_DB
+#       POSTGRES_USER: $POSTGRES_USER
+#       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+#     ports:
+#       - "5432:5432"
+#     expose:
+#       - "5432"
+#     volumes:
+#       - db_data:/var/lib/postgresql/data
+# volumes:
+#   db_data:

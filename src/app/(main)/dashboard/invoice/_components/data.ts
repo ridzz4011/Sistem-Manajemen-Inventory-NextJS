@@ -5,6 +5,9 @@ export interface InvoiceLineItem {
   description: string;
   quantity: number;
   unitPrice: number;
+  category: string;
+  sku?: string;
+  uom?: string;
 }
 
 export interface InvoiceTaxOption {
@@ -37,9 +40,32 @@ export interface InvoiceToDetails {
   email: string;
   addressLines: string[];
   taxId: string;
+  type?: "VENDOR" | "CLIENT";
+}
+
+export type InvoiceTransactionType = "STOCK_IN" | "STOCK_OUT";
+
+export interface InvoiceLocationOption {
+  id: string;
+  name: string;
+  warehouseName: string;
+}
+
+export interface InvoiceAvailableItem {
+  id: string;
+  sku: string;
+  name: string;
+  unitPrice: number;
+  uom: string;
+  totalQuantity: number;
+  balances: {
+    locationId: string;
+    quantity: number;
+  }[];
 }
 
 export interface InvoiceFormValues {
+  transactionType: InvoiceTransactionType;
   referenceNumber: string;
   issuedDate: string;
   paymentDueDate: string;
@@ -48,12 +74,15 @@ export interface InvoiceFormValues {
   taxId: string;
   discountType: InvoiceDiscountType;
   discountValue: number;
+  locationId: string;
+  notes: string;
   items: InvoiceLineItem[];
 }
 
 const today = new Date();
 
 export const defaultInvoiceValues: InvoiceFormValues = {
+  transactionType: "STOCK_IN",
   referenceNumber: "FL-0425",
   issuedDate: format(today, "yyyy-MM-dd"),
   paymentDueDate: format(addDays(today, 14), "yyyy-MM-dd"),
@@ -78,24 +107,24 @@ export const defaultInvoiceValues: InvoiceFormValues = {
   taxId: "vat",
   discountType: "fixed",
   discountValue: 40,
+  locationId: "",
+  notes: "",
   items: [
     {
       id: "hosting",
-      description: "Cloud hosting services",
+      description: "Electronic device sample",
       quantity: 1,
       unitPrice: 3500,
+      category: "electronics",
+      uom: "PCS",
     },
     {
       id: "analytics",
-      description: "Data analytics report",
+      description: "Food package sample",
       quantity: 2,
       unitPrice: 750,
-    },
-    {
-      id: "support",
-      description: "Technical support retainer",
-      quantity: 1,
-      unitPrice: 400,
+      category: "food",
+      uom: "PCS",
     },
   ],
 };
@@ -113,12 +142,12 @@ export const invoiceTaxOptions: InvoiceTaxOption[] = [
   },
   {
     id: "service-tax",
-    name: "Service Tax",
+    name: "Pajak Layanan",
     rate: 10,
   },
   {
     id: "none",
-    name: "No Tax",
+    name: "Tanpa Pajak",
     rate: 0,
   },
 ];
@@ -140,6 +169,14 @@ export const invoiceClients: InvoiceToDetails[] = [
     taxId: "DE-VAT-219384756",
   },
 ];
+
+export const invoiceItemCategories = [
+  { id: "electronics", label: "Elektronik / Perangkat", prefix: "KMP-E", uom: "PCS" },
+  { id: "food", label: "Makanan / Bahan Pokok", prefix: "KMP-F", uom: "PCS" },
+  { id: "general", label: "Barang Umum", prefix: "KMP-G", uom: "PCS" },
+] as const;
+
+export const invoiceUomOptions = ["PCS", "KG"] as const;
 
 export function getLineAmount(item?: InvoiceLineItem) {
   if (!item) return 0;

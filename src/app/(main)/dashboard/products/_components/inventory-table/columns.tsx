@@ -2,6 +2,7 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Edit, MoreHorizontal, Trash2, History } from "lucide-react";
+import { toast } from "sonner";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { type InventoryRow } from "./schema";
+
+async function editItem(item: InventoryRow) {
+  const name = window.prompt("Nama barang", item.name);
+  if (!name) return;
+
+  const price = window.prompt("Harga dasar", String(item.basePrice));
+  if (!price) return;
+
+  const response = await fetch("/api/items", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: item.id, name, basePrice: Number(price) }),
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    toast.error(result.message || "Gagal mengubah barang.");
+    return;
+  }
+
+  toast.success("Barang diperbarui.");
+  window.location.reload();
+}
+
+async function deleteItem(item: InventoryRow) {
+  if (!window.confirm(`Hapus ${item.name}? Barang yang sudah punya transaksi tidak bisa dihapus.`)) return;
+
+  const response = await fetch(`/api/items?id=${encodeURIComponent(item.id)}`, { method: "DELETE" });
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    toast.error(result.message || "Gagal menghapus barang.");
+    return;
+  }
+
+  toast.success("Barang dihapus.");
+  window.location.reload();
+}
 
 export const inventoryColumns: ColumnDef<InventoryRow>[] = [
   // 1. Kolom Pilihan (Checkbox Selection)
@@ -167,7 +206,7 @@ export const inventoryColumns: ColumnDef<InventoryRow>[] = [
               <DropdownMenuLabel>Aksi Produk</DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem onClick={() => console.log("Edit item:", item.id)}>
+              <DropdownMenuItem onClick={() => editItem(item)}>
                 <Edit className="mr-2 h-4 w-4 text-muted-foreground" />
                 Edit Detail Barang
               </DropdownMenuItem>
@@ -180,7 +219,7 @@ export const inventoryColumns: ColumnDef<InventoryRow>[] = [
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                onClick={() => console.log("Hapus item:", item.id)}
+                onClick={() => deleteItem(item)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Hapus Barang

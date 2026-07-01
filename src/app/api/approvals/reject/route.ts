@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
-import { ApprovalStatus } from "@/generated/prisma/client";
+import { ApprovalStatus, EntityType, PartnerStatus } from "@/generated/prisma/client";
+import { rejectInventoryTransaction } from "@/server/inventory-transactions";
 
 export async function POST(req: Request) {
   try {
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
 
     switch (request.type) {
       case "NEW_ITEM":
-        vflowEndpoint = "/webhook/kelompok2/inventory/item/create-v15";
+        vflowEndpoint = "/webhook/kelompok2/inventory/item/create";
         vflowPayload = {
           ...vflowPayload,
           item_name: payload.item_name ?? payload.name,
@@ -47,26 +48,28 @@ export async function POST(req: Request) {
         };
         const vNameReject = payload.vendor_name ?? payload.name;
         if (vNameReject) {
-          const existing = await prisma.partner.findFirst({ where: { name: vNameReject, type: "VENDOR" } });
+          const existing = await prisma.partner.findFirst({ where: { name: vNameReject, type: EntityType.VENDOR } });
           if (existing) {
-            await prisma.partner.update({ where: { id: existing.id }, data: { status: "Suspended" } });
+            await prisma.partner.update({ where: { id: existing.id }, data: { status: PartnerStatus.SUSPENDED } });
           }
         }
         break;
       case "STOCK_IN":
         vflowEndpoint = "/webhook/kelompok2/inventory/stock-in";
+        await rejectInventoryTransaction(payload.transactionId ?? request.id);
         vflowPayload = {
           ...vflowPayload,
-          transactionId: request.id,
+          transactionId: payload.transactionId ?? request.id,
           expected_qty: payload.expected_qty ?? payload.expectedQty,
           received_qty: payload.received_qty ?? payload.receivedQty
         };
         break;
       case "STOCK_OUT":
         vflowEndpoint = "/webhook/kelompok2/inventory/stock-out";
+        await rejectInventoryTransaction(payload.transactionId ?? request.id);
         vflowPayload = {
           ...vflowPayload,
-          transactionId: request.id,
+          transactionId: payload.transactionId ?? request.id,
           current_stock: payload.current_stock ?? payload.currentStock,
           requested_qty: payload.requested_qty ?? payload.requestedQty
         };

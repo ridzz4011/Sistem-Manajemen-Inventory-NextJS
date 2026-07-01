@@ -1,105 +1,40 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { ApprovalStatus } from "@/generated/prisma/client";
+import { completeInventoryTransaction } from "@/server/inventory-transactions";
 import { prisma } from "@/server/db/prisma";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
+    const authHeader = req.headers.get("authorization");
+    if (authHeader && authHeader !== `Bearer ${process.env.API_SECRET_KEY}`) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
-
-    const transaction = await prisma.transaction.findUnique({
-      where: {
-        id: body.transactionId,
-      },
-      include: {
-        details: true,
-      },
-    });
-
-    if (!transaction) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Transaction tidak ditemukan",
-        },
-        { status: 404 }
-      );
+    const transactionId = body.transactionId;
+    if (!transactionId) {
+      return NextResponse.json({ success: false, message: "transactionId is required" }, { status: 400 });
     }
 
-    if (transaction.status !== "PENDING") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Transaction bukan status PENDING",
-        },
-        { status: 400 }
-      );
-    }
+    const transaction = await completeInventoryTransaction(transactionId);
 
-    // kurangi stok
-    for (const detail of transaction.details) {
-      const balance = await prisma.inventoryBalance.findFirst({
-        where: {
-          itemId: detail.itemId,
-          locationId: detail.locationId,
-        },
-      });
-
-      if (!balance) {
-        throw new Error("Inventory balance tidak ditemukan");
-      }
-
-      await prisma.inventoryBalance.update({
-        where: {
-          id: balance.id,
-        },
-        data: {
-          quantity: balance.quantity - detail.quantity,
-        },
+    if (body.requestId) {
+      await prisma.approvalRequest.updateMany({
+        where: { id: body.requestId },
+        data: { status: ApprovalStatus.APPROVED },
       });
     }
-
-    await prisma.transaction.update({
-      where: {
-        id: transaction.id,
-      },
-      data: {
-        status: "COMPLETED",
-      },
-    });
-
-    await prisma.workflowTask.updateMany({
-      where: {
-        transactionId: transaction.id,
-      },
-      data: {
-        status: "APPROVED",
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        transactionId: transaction.id,
-        workflowName: "Stock Out Workflow",
-        entityType: "Transaction",
-        entityId: transaction.id,
-        action: "STOCK_OUT_APPROVED",
-        actorRole: "KEPALA_GUDANG",
-        status: "COMPLETED",
-      },
-    });
 
     return NextResponse.json({
       success: true,
       message: "Stock Out Approved",
+      data: transaction,
     });
   } catch (error) {
-    console.error(error);
-
+    console.error("Error approving stock out:", error);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal server error",
-      },
-      { status: 500 }
+      { success: false, message: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 },
     );
   }
 }

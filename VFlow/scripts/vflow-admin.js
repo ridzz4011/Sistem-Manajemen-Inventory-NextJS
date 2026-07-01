@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const https = require('node:https');
 
-const BASE_URL = process.env.VFLOW_BASE_URL || '';
+const BASE_URL = process.env.VFLOW_BASE_URL || 'https://sqavflow.vastar.id';
 const ADMIN_KEY = process.env.VFLOW_ADMIN_KEY || '';
 const DEFAULT_TENANT = process.env.VFLOW_TENANT || '_default';
 const REQUEST_TIMEOUT_MS = parseInt(process.env.VFLOW_REQ_TIMEOUT_MS || '12000', 10);

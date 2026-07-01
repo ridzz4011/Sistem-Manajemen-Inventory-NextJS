@@ -27,32 +27,32 @@ const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
 const inventorySummary = [
   {
     icon: PackageCheck,
-    label: "In stock",
+    label: "Stok tersedia",
     value: chartData[0]["in-stock"],
   },
   {
     icon: TriangleAlert,
-    label: "Low stock",
+    label: "Stok menipis",
     value: chartData[0]["low-stock"],
   },
   {
     icon: PackageX,
-    label: "Out",
+    label: "Habis",
     value: chartData[0]["out-of-stock"],
   },
 ] as const;
 
 const chartConfig = {
   "in-stock": {
-    label: "In stock",
+    label: "Stok tersedia",
     color: "var(--chart-2)",
   },
   "low-stock": {
-    label: "Low stock",
+    label: "Stok menipis",
     color: "var(--chart-1)",
   },
   "out-of-stock": {
-    label: "Out of stock",
+    label: "Stok habis",
     color: "var(--destructive)",
   },
 } satisfies ChartConfig;
@@ -61,9 +61,9 @@ export function Inventory() {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Inventory</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Inventaris</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {availablePercent}% available
+          {availablePercent}% tersedia
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />
@@ -99,7 +99,7 @@ export function Inventory() {
                           {availablePercent}%
                         </tspan>
                         <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 38}>
-                          Available
+                          Tersedia
                         </tspan>
                       </text>
                     );

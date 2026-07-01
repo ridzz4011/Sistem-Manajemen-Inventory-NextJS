@@ -1,19 +1,19 @@
-export type SupplierStatus = "Active" | "Inactive" | "Pending" | "Suspended";
+export type SupplierStatus = "Aktif" | "Nonaktif" | "Menunggu" | "Ditangguhkan";
 
 export const statusMeta: Record<SupplierStatus, { badgeClass: string; dotClass: string }> = {
-  Active: {
+  Aktif: {
     badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-300",
     dotClass: "bg-emerald-500",
   },
-  Inactive: {
+  Nonaktif: {
     badgeClass: "border-slate-500/30 text-slate-700 dark:text-slate-300",
     dotClass: "bg-slate-500",
   },
-  Pending: {
+  Menunggu: {
     badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-300",
     dotClass: "bg-amber-500",
   },
-  Suspended: {
+  Ditangguhkan: {
     badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-300",
     dotClass: "bg-rose-500",
   },
@@ -40,7 +40,7 @@ export const suppliers: SupplierRow[] = [
     email: "andi.pratama@sumbermakmur.co.id",
     phone: "+62 812-3456-7890",
     category: "Makanan & Minuman",
-    status: "Active",
+    status: "Aktif",
     products: "Snack, minuman kemasan",
     rating: 4.8,
     joinedDate: "12 Jan 2024",
@@ -52,7 +52,7 @@ export const suppliers: SupplierRow[] = [
     email: "siti@berkahelektronik.id",
     phone: "+62 813-9876-5432",
     category: "Elektronik",
-    status: "Active",
+    status: "Aktif",
     products: "Aksesoris gadget, charger",
     rating: 4.6,
     joinedDate: "03 Mar 2024",
@@ -64,7 +64,7 @@ export const suppliers: SupplierRow[] = [
     email: "budi.santoso@nusantarapackaging.com",
     phone: "+62 811-2345-6789",
     category: "Perlengkapan Toko",
-    status: "Active",
+    status: "Aktif",
     products: "Box, label, plastik kemasan",
     rating: 4.4,
     joinedDate: "21 Apr 2024",
@@ -76,7 +76,7 @@ export const suppliers: SupplierRow[] = [
     email: "rina@jayaabadi.co.id",
     phone: "+62 819-8765-4321",
     category: "Peralatan Rumah Tangga",
-    status: "Pending",
+    status: "Menunggu",
     products: "Sapu, ember, lap microfiber",
     rating: 4.1,
     joinedDate: "16 Jun 2024",
@@ -88,7 +88,7 @@ export const suppliers: SupplierRow[] = [
     email: "hendra.wijaya@grahafarmasi.com",
     phone: "+62 821-1122-3344",
     category: "Kesehatan",
-    status: "Active",
+    status: "Aktif",
     products: "Vitamin, obat bebas, masker",
     rating: 4.9,
     joinedDate: "08 Feb 2024",
@@ -100,7 +100,7 @@ export const suppliers: SupplierRow[] = [
     email: "dewi@mitrakain.id",
     phone: "+62 822-4455-6677",
     category: "Tekstil",
-    status: "Inactive",
+    status: "Nonaktif",
     products: "Kain, serbet, lap",
     rating: 3.9,
     joinedDate: "30 May 2023",
@@ -112,7 +112,7 @@ export const suppliers: SupplierRow[] = [
     email: "rudi@segaralam.co.id",
     phone: "+62 856-7788-9900",
     category: "Makanan & Minuman",
-    status: "Active",
+    status: "Aktif",
     products: "Buah segar, sayur organik",
     rating: 4.7,
     joinedDate: "19 Sep 2024",
@@ -124,7 +124,7 @@ export const suppliers: SupplierRow[] = [
     email: "lina@teknologimaju.id",
     phone: "+62 857-3344-5566",
     category: "Elektronik",
-    status: "Suspended",
+    status: "Ditangguhkan",
     products: "Mouse, keyboard, headset",
     rating: 3.7,
     joinedDate: "14 Jul 2024",
@@ -136,7 +136,7 @@ export const suppliers: SupplierRow[] = [
     email: "agus@berkahfurniture.co.id",
     phone: "+62 858-2233-4455",
     category: "Furniture",
-    status: "Active",
+    status: "Aktif",
     products: "Rak, kursi, meja kasir",
     rating: 4.5,
     joinedDate: "05 Aug 2024",
@@ -148,7 +148,7 @@ export const suppliers: SupplierRow[] = [
     email: "maya@kimiasejahtera.com",
     phone: "+62 859-6677-8899",
     category: "Kebersihan",
-    status: "Active",
+    status: "Aktif",
     products: "Sabun, deterjen, pembersih lantai",
     rating: 4.3,
     joinedDate: "27 Oct 2024",

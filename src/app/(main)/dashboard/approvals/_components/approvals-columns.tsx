@@ -49,7 +49,7 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
     id: "search",
     accessorFn: (row) => {
       const payload = row.payload as any;
-      return `${row.id} ${row.type} ${row.requestedBy} ${payload?.name || ""}`;
+      return `${row.id} ${row.type} ${row.requestedBy} ${payload?.name || payload?.vendor_name || payload?.item_name || ""}`;
     },
     filterFn: "includesString",
   },
@@ -58,7 +58,7 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
     header: "Nama",
     cell: ({ row }) => {
       const payload = row.original.payload as any;
-      const itemName = payload?.item_name || payload?.name || row.original.id;
+      const itemName = payload?.item_name || payload?.name || payload?.vendor_name || payload?.referenceNo || row.original.id;
       return (
         <div className="grid min-w-0 gap-1">
           <div className="truncate font-medium text-foreground text-sm">{itemName}</div>
@@ -86,6 +86,14 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
       if (row.original.type === "NEW_VENDOR") {
         return <div className="max-w-75 truncate text-sm">Vendor: {payload?.vendor_name || payload?.name}</div>;
       }
+      if (row.original.type === "STOCK_IN" || row.original.type === "STOCK_OUT") {
+        const direction = row.original.type === "STOCK_IN" ? "Barang Masuk" : "Barang Keluar";
+        return (
+          <div className="max-w-75 truncate text-sm">
+            {direction}: {payload?.items?.length ?? 0} barang - {payload?.partner_name || "Mitra"}
+          </div>
+        );
+      }
       return <div className="max-w-75 truncate text-sm text-muted-foreground">Transaksi Inventory ID: {row.original.id}</div>;
     },
   },
@@ -108,14 +116,14 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
       return (
         <Badge className={cn("gap-1.5 border px-2 py-1 font-medium", meta.badgeClass)} variant="outline">
           <span className={cn("size-1.5 rounded-full", meta.dotClass)} />
-          {status}
+          {translateApprovalStatus(status)}
         </Badge>
       );
     },
   },
   {
     id: "actions",
-    header: () => <div className="text-right">Actions</div>,
+    header: () => <div className="text-right">Aksi</div>,
     cell: ({ row }) => {
       const [isPending, startTransition] = React.useTransition();
       const requestId = row.original.id;
@@ -124,9 +132,9 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
         startTransition(async () => {
           const res = await approveRequestAction(requestId);
           if (res?.success) {
-            toast.success("Request berhasil disetujui, meneruskan ke VFlow!");
+            toast.success("Permintaan berhasil disetujui, meneruskan ke VFlow!");
           } else {
-            toast.error(res?.message || "Gagal menyetujui request.");
+            toast.error(res?.message || "Gagal menyetujui permintaan.");
           }
         });
       };
@@ -135,9 +143,9 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
         startTransition(async () => {
           const res = await rejectRequestAction(requestId);
           if (res?.success) {
-            toast.success("Request berhasil ditolak.");
+            toast.success("Permintaan berhasil ditolak.");
           } else {
-            toast.error(res?.message || "Gagal menolak request.");
+            toast.error(res?.message || "Gagal menolak permintaan.");
           }
         });
       };
@@ -156,7 +164,7 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>View JSON Payload</DropdownMenuItem>
+              <DropdownMenuItem>Lihat Payload JSON</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleApprove}
@@ -177,3 +185,13 @@ export const approvalsColumns: ColumnDef<ApprovalRow>[] = [
     },
   },
 ];
+
+function translateApprovalStatus(value: string) {
+  const labels: Record<string, string> = {
+    PENDING: "Menunggu",
+    APPROVED: "Disetujui",
+    REJECTED: "Ditolak",
+  };
+
+  return labels[value] ?? value;
+}

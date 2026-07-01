@@ -128,11 +128,11 @@ function getTrafficData() {
 
 const trafficConfig = {
   visitors: {
-    label: "Visitors",
+    label: "Pengunjung",
     color: "var(--chart-3)",
   },
   anomalies: {
-    label: "Anomalies",
+    label: "Anomali",
     color: "var(--destructive)",
   },
 } satisfies ChartConfig;
@@ -148,18 +148,18 @@ export function StoreTraffic() {
 
   function formatTrafficTick(value: string) {
     if (value === firstTrafficTimestamp) {
-      return "24h ago";
+      return "24 jam lalu";
     }
 
-    return value === lastTrafficTimestamp ? "now" : "";
+    return value === lastTrafficTimestamp ? "sekarang" : "";
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Store Traffic</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Trafik Toko</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          12.9K visits
+          12,9 rb kunjungan
         </CardDescription>
         <CardAction>
           <ArrowUpRight className="size-4" />

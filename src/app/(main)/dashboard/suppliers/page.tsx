@@ -11,10 +11,11 @@ export default async function Page() {
   });
 
   const formattedSuppliers: SupplierRow[] = vendors.map((v) => {
-    let mappedStatus: SupplierStatus = "Pending";
-    if (v.status === "Active") mappedStatus = "Active";
-    else if (v.status === "Inactive") mappedStatus = "Inactive";
-    else if (v.status === "Suspended") mappedStatus = "Suspended";
+    let mappedStatus: SupplierStatus = "Menunggu";
+    if (v.status === "ACTIVE") mappedStatus = "Aktif";
+    else if (v.status === "INACTIVE") mappedStatus = "Nonaktif";
+    else if (v.status === "PENDING") mappedStatus = "Menunggu";
+    else if (v.status === "SUSPENDED") mappedStatus = "Ditangguhkan";
 
     return {
       id: v.id,

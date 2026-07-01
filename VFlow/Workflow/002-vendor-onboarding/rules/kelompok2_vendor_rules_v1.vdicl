@@ -15,17 +15,21 @@ rules:
     priority: 10
     enabled: true
     description: "Vendor masuk blacklist"
-    when: "vendor_status == 'BLACKLISTED'"
+    when: vendor_status == "BLACKLISTED"
     then:
       - kind: SET_FIELD
         path: decision
         value: "REJECTED"
+      - kind: SET_DECISION
+        decision: REJECT
   - id: "VALID_VENDOR"
     priority: 100
     enabled: true
     description: "Vendor valid"
-    when: "vendor_status != 'BLACKLISTED'"
+    when: vendor_status != "BLACKLISTED"
     then:
       - kind: SET_FIELD
         path: decision
         value: "PENDING"
+      - kind: SET_DECISION
+        decision: REVIEW

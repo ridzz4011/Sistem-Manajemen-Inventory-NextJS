@@ -95,7 +95,7 @@ model Partner {
   name          String
   contactPerson String?
   type          EntityType
-  status        PartnerStatus @default(Pending)
+  status        PartnerStatus @default(PENDING)
   email         String?
   phone         String?
   address       String?

@@ -3,6 +3,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { Check, Clock, Mail, MoreHorizontal, Phone, Star, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,44 @@ import {
 import { cn } from "@/lib/utils";
 
 import { statusMeta, type SupplierRow } from "./data";
+
+async function editSupplier(supplier: SupplierRow) {
+  const name = window.prompt("Nama vendor", supplier.name);
+  if (!name) return;
+
+  const category = window.prompt("Kategori", supplier.category);
+  if (!category) return;
+
+  const response = await fetch("/api/suppliers", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: supplier.id, name, category }),
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    toast.error(result.message || "Gagal mengubah vendor.");
+    return;
+  }
+
+  toast.success("Vendor diperbarui.");
+  window.location.reload();
+}
+
+async function deactivateSupplier(supplier: SupplierRow) {
+  if (!window.confirm(`Nonaktifkan ${supplier.name}?`)) return;
+
+  const response = await fetch(`/api/suppliers?id=${encodeURIComponent(supplier.id)}`, { method: "DELETE" });
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    toast.error(result.message || "Gagal menonaktifkan vendor.");
+    return;
+  }
+
+  toast.success("Vendor dinonaktifkan.");
+  window.location.reload();
+}
 
 function StatusBadge({ status }: { status: SupplierRow["status"] }) {
   const meta = statusMeta[status];
@@ -140,10 +179,12 @@ export const suppliersColumns: ColumnDef<SupplierRow>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Lihat Detail Vendor</DropdownMenuItem>
-            <DropdownMenuItem>Edit Vendor</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => editSupplier(row.original)}>Edit Vendor</DropdownMenuItem>
             <DropdownMenuItem>Lihat Riwayat Pembelian</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Nonaktifkan Vendor</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={() => deactivateSupplier(row.original)}>
+              Nonaktifkan Vendor
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

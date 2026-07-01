@@ -105,9 +105,9 @@ Compile VRule pack:
 
 ```bash
 jq -n \
-  --rawfile r ./provision-pattern/047-fastpath-vrule-risk-scoring/rules/fastpath_risk_v1.vdicl \
-  --rawfile s ./provision-pattern/047-fastpath-vrule-risk-scoring/schemas/fastpath_risk_fact_v1.yaml \
-  '{rule_set_id:"fastpath_risk_v1", rules_yaml:$r, schema_yaml:$s}' \
+  --rawfile r ./VFlow/Workflow/001-item-approval/rules/kelompok2_item_rules_v1.vdicl \
+  --rawfile s ./VFlow/Workflow/001-item-approval/schemas/item_fact_v1.yaml \
+  '{rule_set_id:"kelompok2_item_rules_v1", rules_yaml:$r, schema_yaml:$s}' \
   | curl -sS -X POST \
       -H "x-api-key: ${VFLOW_ADMIN_KEY}" \
       -H 'Content-Type: application/json' \

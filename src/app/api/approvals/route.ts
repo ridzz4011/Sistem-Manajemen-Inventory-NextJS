@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
-import { ApprovalStatus, ApprovalType } from "@/generated/prisma/client";
+import { ApprovalStatus, ApprovalType, EntityType, PartnerStatus } from "@/generated/prisma/client";
 
 export async function GET(req: Request) {
   try {
@@ -23,13 +23,51 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { type, requestedBy, payload, notes } = body;
+    let approvalPayload = payload;
+
+    if (type === "NEW_VENDOR") {
+      const vendorName = payload.vendor_name ?? payload.name;
+      if (vendorName) {
+        const vendorData = {
+          name: vendorName,
+          contactPerson: payload.vendor_contactPerson ?? payload.contactPerson ?? "-",
+          phone: payload.vendor_phone ?? payload.phone ?? payload.vendor_contact ?? "-",
+          email: payload.vendor_email ?? payload.email ?? "-",
+          address: payload.vendor_address ?? payload.address ?? "-",
+          category: payload.vendor_category ?? payload.category ?? "Umum",
+          products: payload.vendor_products ?? payload.products ?? "-",
+          rating: Number(payload.vendor_rating ?? payload.rating ?? 0),
+          status: PartnerStatus.PENDING,
+          joinedDate: "-",
+          type: EntityType.VENDOR,
+        };
+
+        const existing = await prisma.partner.findFirst({
+          where: { name: vendorName, type: EntityType.VENDOR },
+        });
+
+        const partner = existing
+          ? await prisma.partner.update({
+              where: { id: existing.id },
+              data: vendorData,
+            })
+          : await prisma.partner.create({
+              data: vendorData,
+            });
+
+        approvalPayload = {
+          ...payload,
+          partnerId: partner.id,
+        };
+      }
+    }
 
     // 1. Simpan ke database (Tabel Transisi ApprovalRequest)
     const approvalRequest = await prisma.approvalRequest.create({
       data: {
         type: type as ApprovalType,
         requestedBy,
-        payload,
+        payload: approvalPayload,
         notes,
         status: ApprovalStatus.PENDING,
       },
@@ -42,9 +80,10 @@ export async function POST(req: Request) {
 
     switch (type) {
       case "NEW_ITEM":
-        vflowEndpoint = "/webhook/kelompok2/inventory/item/create-v15";
+        vflowEndpoint = "/webhook/kelompok2/inventory/item/create";
         vflowPayload = {
           requestId: approvalRequest.id,
+          type: "NEW_ITEM",
           item_name: payload.item_name ?? payload.name,
           item_sku: payload.item_sku ?? payload.sku,
           item_price: payload.item_price ?? payload.price,
@@ -55,37 +94,19 @@ export async function POST(req: Request) {
         vflowEndpoint = "/webhook/kelompok2/inventory/vendor/register";
         vflowPayload = {
           requestId: approvalRequest.id,
-          vendor_name: payload.vendor_name ?? payload.name,
-          vendor_contact: payload.vendor_contact ?? payload.contact,
-          vendor_status: payload.vendor_status ?? payload.status ?? "NEW"
+          type: "NEW_VENDOR",
+          partnerId: approvalPayload.partnerId,
+          vendor_name: approvalPayload.vendor_name ?? approvalPayload.name,
+          vendor_contactPerson: approvalPayload.vendor_contactPerson ?? approvalPayload.contactPerson,
+          vendor_contact: approvalPayload.vendor_contact ?? approvalPayload.contact,
+          vendor_phone: approvalPayload.vendor_phone ?? approvalPayload.phone,
+          vendor_email: approvalPayload.vendor_email ?? approvalPayload.email,
+          vendor_address: approvalPayload.vendor_address ?? approvalPayload.address,
+          vendor_category: approvalPayload.vendor_category ?? approvalPayload.category,
+          vendor_products: approvalPayload.vendor_products ?? approvalPayload.products,
+          vendor_rating: approvalPayload.vendor_rating ?? approvalPayload.rating,
+          vendor_status: approvalPayload.vendor_status ?? approvalPayload.status ?? "NEW"
         };
-
-        const vName = payload.vendor_name ?? payload.name;
-        if (vName) {
-          const existing = await prisma.partner.findFirst({ where: { name: vName, type: "VENDOR" } });
-          if (!existing) {
-            await prisma.partner.create({
-              data: {
-                name: vName,
-                contactPerson: payload.vendor_contactPerson ?? payload.contactPerson ?? "-",
-                phone: payload.vendor_phone ?? payload.phone ?? "-",
-                email: payload.vendor_email ?? payload.email ?? "-",
-                address: payload.vendor_address ?? payload.address ?? "-",
-                category: payload.vendor_category ?? payload.category ?? "Umum",
-                products: payload.vendor_products ?? payload.products ?? "-",
-                rating: Number(payload.vendor_rating ?? payload.rating ?? 0),
-                status: "Pending",
-                joinedDate: "-",
-                type: "VENDOR",
-              },
-            });
-          } else {
-            await prisma.partner.update({
-              where: { id: existing.id },
-              data: { status: "Pending" },
-            });
-          }
-        }
         break;
       case "STOCK_IN":
         vflowEndpoint = "/webhook/kelompok2/inventory/stock-in";
@@ -122,25 +143,37 @@ export async function POST(req: Request) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(vflowPayload),
       });
+      const responseText = await res.text();
+      console.log("[Next.js] VFlow webhook response", {
+        endpoint: vflowEndpoint,
+        status: res.status,
+        ok: res.ok,
+        body: responseText,
+      });
+
       try {
-        const resData = await res.json();
+        const resData = responseText ? JSON.parse(responseText) : null;
         if (resData && resData.status === "rejected") {
           await prisma.approvalRequest.update({
             where: { id: approvalRequest.id },
-            data: { status: "REJECTED", notes: resData.reason || "Ditolak otomatis oleh sistem (Blacklist Vendor)" },
+            data: { status: ApprovalStatus.REJECTED, notes: resData.reason || "Ditolak otomatis oleh sistem (Blacklist Vendor)" },
           });
           approvalRequest.status = "REJECTED";
 
-          const vName = payload.vendor_name ?? payload.name;
+          const vName = approvalPayload.vendor_name ?? approvalPayload.name;
           if (vName) {
-            const existing = await prisma.partner.findFirst({ where: { name: vName, type: "VENDOR" } });
+            const existing = await prisma.partner.findFirst({ where: { name: vName, type: EntityType.VENDOR } });
             if (existing) {
-              await prisma.partner.update({ where: { id: existing.id }, data: { status: "Suspended" } });
+              await prisma.partner.update({ where: { id: existing.id }, data: { status: PartnerStatus.SUSPENDED } });
             }
           }
         }
       } catch (e) {
         // Abaikan error parsing JSON jika response kosong
+        console.warn("[Next.js] VFlow webhook returned non-JSON/empty response", {
+          endpoint: vflowEndpoint,
+          status: res.status,
+        });
       }
     }
 

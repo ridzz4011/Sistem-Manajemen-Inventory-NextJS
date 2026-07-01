@@ -108,7 +108,7 @@ export function SuppliersTable({ table }: { table: TableType<SupplierRow> }) {
             </Select>
           </div>
           <span>
-            Page {currentPage} of {pageCount}
+            Halaman {currentPage} dari {pageCount}
           </span>
         </div>
 

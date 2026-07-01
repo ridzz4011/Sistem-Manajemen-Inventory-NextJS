@@ -8,3 +8,6 @@ fields:
   - path: vendor_status
     scalar: SYM
     nullable: false
+  - path: decision
+    scalar: SYM
+    nullable: true

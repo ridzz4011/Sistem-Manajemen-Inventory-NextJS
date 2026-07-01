@@ -74,9 +74,9 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
   return (
     <Card>
       <CardHeader className="border-b has-data-[slot=card-action]:grid-cols-1 md:has-data-[slot=card-action]:grid-cols-[1fr_auto]">
-        <CardTitle className="text-xl leading-none">Approvals</CardTitle>
+        <CardTitle className="text-xl leading-none">Persetujuan</CardTitle>
         <CardDescription className="max-w-sm leading-snug">
-          Review and manage pending requests for new items, vendors, and inventory adjustments.
+          Tinjau dan kelola permintaan barang baru, vendor baru, dan transaksi inventaris.
         </CardDescription>
         <CardAction className="col-start-1 row-start-auto flex w-full flex-wrap justify-start gap-2 justify-self-stretch md:col-start-2 md:row-span-2 md:row-start-1 md:w-auto md:flex-nowrap md:justify-end md:justify-self-end">
           <InputGroup className="h-7 w-full md:w-64">
@@ -85,7 +85,7 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
             </InputGroupAddon>
             <InputGroupInput
               className="h-7"
-              placeholder="Search requests..."
+              placeholder="Cari permintaan..."
               value={searchQuery}
               onChange={(event) => {
                 table.getColumn("search")?.setFilterValue(event.target.value || undefined);
@@ -97,7 +97,7 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
             <ListFilter className="mr-2 size-4" /> Filter
           </Button>
           <Button variant="outline" size="sm">
-            <Download className="mr-2 size-4" /> Export
+            <Download className="mr-2 size-4" /> Ekspor
           </Button>
         </CardAction>
       </CardHeader>
@@ -106,14 +106,14 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
           <div className="flex flex-wrap items-center gap-3">
             <Select value={idFilter} onValueChange={(value) => setColumnSelectFilter("type", value)}>
               <SelectTrigger size="sm">
-                <span className="text-muted-foreground">Request Type:</span>
+                <span className="text-muted-foreground">Jenis Permintaan:</span>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
                 <SelectGroup>
                   {filters.type.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option}
+                      {option === "All" ? "Semua" : translateApprovalType(option)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -129,7 +129,7 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
                 <SelectGroup>
                   {filters.status.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option}
+                      {option === "All" ? "Semua" : translateApprovalStatus(option)}
                     </SelectItem>
                   ))}
                 </SelectGroup>
@@ -141,19 +141,19 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
         <div className="flex items-center justify-between gap-3 px-4 h-9">
           <div className="text-muted-foreground text-sm tabular-nums">
             {selectedCount > 0 ? (
-              <span className="font-medium text-foreground">{selectedCount} selected</span>
+              <span className="font-medium text-foreground">{selectedCount} dipilih</span>
             ) : (
-              "0 selected"
+              "0 dipilih"
             )}
           </div>
           
           {selectedCount > 0 && (
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" className="text-rose-600 hover:text-rose-700 hover:bg-rose-50">
-                <XCircle className="mr-2 size-4" /> Reject Selected
+                <XCircle className="mr-2 size-4" /> Tolak Terpilih
               </Button>
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                <CheckCircle2 className="mr-2 size-4" /> Approve Selected
+                <CheckCircle2 className="mr-2 size-4" /> Setujui Terpilih
               </Button>
             </div>
           )}
@@ -163,4 +163,26 @@ export function Approvals({ approvals }: { approvals: ApprovalRow[] }) {
       </CardContent>
     </Card>
   );
+}
+
+function translateApprovalType(value: string) {
+  const labels: Record<string, string> = {
+    NEW_ITEM: "Barang Baru",
+    NEW_VENDOR: "Vendor Baru",
+    STOCK_IN: "Barang Masuk",
+    STOCK_OUT: "Barang Keluar",
+    STOCK_OPNAME: "Stock Opname",
+  };
+
+  return labels[value] ?? value;
+}
+
+function translateApprovalStatus(value: string) {
+  const labels: Record<string, string> = {
+    PENDING: "Menunggu",
+    APPROVED: "Disetujui",
+    REJECTED: "Ditolak",
+  };
+
+  return labels[value] ?? value;
 }

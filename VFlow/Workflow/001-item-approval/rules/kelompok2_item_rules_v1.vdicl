@@ -1,4 +1,4 @@
-decision_id: kelompok2_item_approval_rules_v1
+decision_id: kelompok2_item_rules_v1
 decision_name: Kelompok 2 Item Approval
 version: 1
 hit_policy: PRIORITY
@@ -11,21 +11,31 @@ schema_ref:
   version: 1
 
 rules:
-  - id: "HIGH_VALUE_ITEM"
+  - id: HIGH_VALUE_ITEM
     priority: 10
     enabled: true
-    description: "Barang bernilai tinggi"
-    when: "item_price > 10000000"
+    description: Barang bernilai tinggi
+    when: item_price > 10000000
     then:
+      - kind: EMIT
+        severity: WARN
+        code: HIGH_VALUE_ITEM
+        field: item_price
+        msg: Barang bernilai tinggi memerlukan persetujuan manager
       - kind: SET_FIELD
         path: decision
         value: "PENDING"
-  - id: "NORMAL_ITEM"
+      - kind: SET_DECISION
+        decision: REVIEW
+
+  - id: NORMAL_ITEM
     priority: 100
     enabled: true
-    description: "Barang normal"
-    when: "item_price <= 10000000"
+    description: Barang normal
+    when: item_price <= 10000000
     then:
       - kind: SET_FIELD
         path: decision
         value: "APPROVED"
+      - kind: SET_DECISION
+        decision: ACCEPT

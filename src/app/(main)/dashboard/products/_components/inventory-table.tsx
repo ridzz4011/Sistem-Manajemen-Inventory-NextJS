@@ -87,9 +87,9 @@ export function InventoryTable({ data }: InventoryTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal text-muted-foreground text-sm">Inventory Stock</CardTitle>
+        <CardTitle className="font-normal text-muted-foreground text-sm">Stok Inventaris</CardTitle>
         <CardDescription className="text-foreground text-xl tabular-nums leading-none tracking-tight">
-          {itemCount} Item
+          {itemCount} Barang
         </CardDescription>
         <CardAction className="flex items-center gap-1">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -105,7 +105,7 @@ export function InventoryTable({ data }: InventoryTableProps) {
               <AddItemForm onSuccess={() => setIsAddDialogOpen(false)} />
             </DialogContent>
           </Dialog>
-          <Button aria-label="Export data" size="icon-sm" variant="outline">
+          <Button aria-label="Ekspor data" size="icon-sm" variant="outline">
             <Download />
           </Button>
           <Button size="icon-sm" variant="outline">

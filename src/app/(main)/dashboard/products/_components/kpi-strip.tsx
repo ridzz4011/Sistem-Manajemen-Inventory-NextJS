@@ -51,11 +51,11 @@ const revenueOverviewData = getRollingRevenueBuckets().flatMap(({ month, values 
 
 const revenueOverviewConfig = {
   revenue: {
-    label: "Revenue",
+    label: "Pendapatan",
     color: "var(--foreground)",
   },
   profit: {
-    label: "Profit",
+    label: "Laba",
     color: "var(--muted-foreground)",
   },
 } satisfies ChartConfig;
@@ -77,7 +77,7 @@ function formatTooltipLabel(value: string) {
   const startDate = new Date(month.getFullYear(), month.getMonth(), Number(start));
   const endDate = new Date(month.getFullYear(), month.getMonth(), Math.min(Number(end), lastDayOfMonth));
 
-  return `${format(month, "MMM")} ${format(startDate, "do")} - ${format(endDate, "do")}, ${format(month, "yyyy")}`;
+  return `${format(startDate, "d")} - ${format(endDate, "d")} ${format(month, "MMM yyyy")}`;
 }
 
 function formatCurrencyTooltipValue(value: unknown) {
@@ -92,9 +92,9 @@ export function KpiStrip() {
           <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-3 xl:col-span-5 xl:border-r">
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Total Sales</CardTitle>
+                <CardTitle className="font-normal text-sm">Total Penjualan</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  $48,560.00
+                  Rp. 48.560.000
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <DollarSign className="size-3 text-foreground" />
@@ -103,14 +103,14 @@ export function KpiStrip() {
               <CardContent>
                 <div className="text-sm">
                   <span className="text-green-700 dark:text-green-300">+15.8%</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-muted-foreground"> vs minggu lalu</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Total Orders</CardTitle>
+                <CardTitle className="font-normal text-sm">Total Pesanan</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   379
                 </CardDescription>
@@ -121,14 +121,14 @@ export function KpiStrip() {
               <CardContent>
                 <div className="text-sm">
                   <span className="text-green-700 dark:text-green-300">+8.3%</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-muted-foreground"> vs minggu lalu</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Customer Growth</CardTitle>
+                <CardTitle className="font-normal text-sm">Pertumbuhan Pelanggan</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   820
                 </CardDescription>
@@ -139,16 +139,16 @@ export function KpiStrip() {
               <CardContent>
                 <div className="text-sm">
                   <span className="text-green-700 dark:text-green-300">+12.5%</span>
-                  <span className="text-muted-foreground"> vs last month</span>
+                  <span className="text-muted-foreground"> vs bulan lalu</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Average Order</CardTitle>
+                <CardTitle className="font-normal text-sm">Rata-rata Pesanan</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
-                  $128
+                  Rp. 128.000
                 </CardDescription>
                 <CardAction className="grid size-6 place-items-center rounded-sm bg-muted">
                   <ReceiptText className="size-3 text-foreground" />
@@ -156,15 +156,15 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-destructive">-$4.20</span>
-                  <span className="text-muted-foreground"> vs last week</span>
+                  <span className="text-destructive">-Rp. 4.200</span>
+                  <span className="text-muted-foreground"> vs minggu lalu</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 border-border border-b ring-0 md:border-r md:border-b-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Return Requests</CardTitle>
+                <CardTitle className="font-normal text-sm">Permintaan Retur</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   18
                 </CardDescription>
@@ -175,14 +175,14 @@ export function KpiStrip() {
               <CardContent>
                 <div className="text-sm">
                   <span className="text-destructive">+0.6%</span>
-                  <span className="text-muted-foreground"> vs last month</span>
+                  <span className="text-muted-foreground"> vs bulan lalu</span>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="h-full rounded-none border-0 ring-0">
               <CardHeader>
-                <CardTitle className="font-normal text-sm">Stock Accuracy</CardTitle>
+                <CardTitle className="font-normal text-sm">Akurasi Stok</CardTitle>
                 <CardDescription className="text-3xl text-foreground tabular-nums leading-none tracking-tight">
                   97%
                 </CardDescription>
@@ -192,8 +192,8 @@ export function KpiStrip() {
               </CardHeader>
               <CardContent>
                 <div className="text-sm">
-                  <span className="text-green-700 dark:text-green-300">+2.4 pts</span>
-                  <span className="text-muted-foreground"> vs last audit</span>
+                  <span className="text-green-700 dark:text-green-300">+2,4 poin</span>
+                  <span className="text-muted-foreground"> vs audit terakhir</span>
                 </div>
               </CardContent>
             </Card>
@@ -201,7 +201,7 @@ export function KpiStrip() {
 
           <Card className="h-full rounded-none border-0 ring-0 xl:col-span-7">
             <CardHeader>
-              <CardTitle className="font-normal">Sales Overview</CardTitle>
+              <CardTitle className="font-normal">Ringkasan Penjualan</CardTitle>
               <CardAction>
                 <ArrowUpRight className="size-4" />
               </CardAction>
@@ -272,7 +272,7 @@ export function KpiStrip() {
                     barSize={4}
                     dataKey="profit"
                     fill="var(--color-profit)"
-                    name="Profit"
+                    name="Laba"
                     opacity={0.18}
                     radius={[6, 6, 0, 0]}
                   />
@@ -281,7 +281,7 @@ export function KpiStrip() {
                     dataKey="revenue"
                     fill="none"
                     filter="url(#sales-line-glow)"
-                    name="Revenue"
+                    name="Pendapatan"
                     stroke="var(--color-revenue)"
                     strokeWidth={1.8}
                     type="linear"

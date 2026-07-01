@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/server/db/prisma";
-import { ApprovalStatus } from "@/generated/prisma/client";
+import { ApprovalStatus, EntityType, PartnerStatus } from "@/generated/prisma/client";
+import { completeInventoryTransaction } from "@/server/inventory-transactions";
 
 export async function POST(req: Request) {
   try {
@@ -26,11 +27,11 @@ export async function POST(req: Request) {
     // 2. Teruskan persetujuan ke VFlow Webhook sesuai tipe request agar VFlow menjalankan call_nextjs_api
     let vflowEndpoint = "";
     const payload: any = request.payload || {};
-    let vflowPayload: any = { requestId: request.id, is_approved: true, is_manual_approval: false };
+    let vflowPayload: any = { requestId: request.id, is_approved: true, is_manual_approval: true };
 
     switch (request.type) {
       case "NEW_ITEM":
-        vflowEndpoint = "/webhook/kelompok2/inventory/item/create-v15";
+        vflowEndpoint = "/webhook/kelompok2/inventory/item/create";
         const sku = payload.item_sku ?? payload.sku;
         const name = payload.item_name ?? payload.name;
         const price = payload.item_price ?? payload.price ?? 0;
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
         }
         vflowPayload = {
           ...vflowPayload,
+          type: "NEW_ITEM",
           item_name: name,
           item_sku: sku,
           item_price: price,
@@ -65,13 +67,13 @@ export async function POST(req: Request) {
 
         if (vendorName) {
           const existingVendor = await prisma.partner.findFirst({
-            where: { name: vendorName, type: "VENDOR" },
+            where: { name: vendorName, type: EntityType.VENDOR },
           });
           if (existingVendor) {
             await prisma.partner.update({
               where: { id: existingVendor.id },
               data: {
-                status: "Active",
+                status: PartnerStatus.ACTIVE,
                 joinedDate: formattedDate,
                 contactPerson: payload.vendor_contactPerson ?? payload.contactPerson ?? existingVendor.contactPerson,
                 phone: payload.vendor_phone ?? payload.phone ?? payload.vendor_contact ?? existingVendor.phone,
@@ -91,9 +93,9 @@ export async function POST(req: Request) {
                 category: payload.vendor_category ?? payload.category ?? "Umum",
                 products: payload.vendor_products ?? payload.products ?? "-",
                 rating: Number(payload.vendor_rating ?? payload.rating ?? 0),
-                status: "Active",
+                status: PartnerStatus.ACTIVE,
                 joinedDate: formattedDate,
-                type: "VENDOR",
+                type: EntityType.VENDOR,
               },
             });
           }
@@ -101,25 +103,35 @@ export async function POST(req: Request) {
 
         vflowPayload = {
           ...vflowPayload,
+          partnerId: payload.partnerId,
           vendor_name: vendorName,
+          vendor_contactPerson: payload.vendor_contactPerson ?? payload.contactPerson,
           vendor_contact: vendorContact,
+          vendor_phone: payload.vendor_phone ?? payload.phone,
+          vendor_email: payload.vendor_email ?? payload.email,
+          vendor_address: payload.vendor_address ?? payload.address,
+          vendor_category: payload.vendor_category ?? payload.category,
+          vendor_products: payload.vendor_products ?? payload.products,
+          vendor_rating: payload.vendor_rating ?? payload.rating,
           vendor_status: payload.vendor_status ?? "NEW"
         };
         break;
       case "STOCK_IN":
         vflowEndpoint = "/webhook/kelompok2/inventory/stock-in";
+        await completeInventoryTransaction(payload.transactionId ?? request.id);
         vflowPayload = {
           ...vflowPayload,
-          transactionId: request.id,
+          transactionId: payload.transactionId ?? request.id,
           expected_qty: payload.expected_qty ?? payload.expectedQty,
           received_qty: payload.received_qty ?? payload.receivedQty
         };
         break;
       case "STOCK_OUT":
         vflowEndpoint = "/webhook/kelompok2/inventory/stock-out";
+        await completeInventoryTransaction(payload.transactionId ?? request.id);
         vflowPayload = {
           ...vflowPayload,
-          transactionId: request.id,
+          transactionId: payload.transactionId ?? request.id,
           current_stock: payload.current_stock ?? payload.currentStock,
           requested_qty: payload.requested_qty ?? payload.requestedQty
         };
